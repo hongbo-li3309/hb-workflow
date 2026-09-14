@@ -1,0 +1,38 @@
+# Local task state and credentials
+.workflow-state/
+.codex/config.local.toml
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Research data remain local unless explicitly reviewed for redistribution
+data/raw/*
+data/cleaned/*
+data/temp/
+# Private execution artifacts; publish only after reviewing their content
+quality_reports/runs/
+# Runtime caches and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+.quarto/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.run.xml
+*-blx.bib
+*.smcl

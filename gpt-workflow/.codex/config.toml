@@ -1,0 +1,5 @@
+# Project-local Codex configuration; checked against codex-cli 0.154.0 on 2026-09-13.
+# Custom roles are standalone files under agents/. No registration table is needed.
+# Keep model, reasoning, permissions, MCP and concurrency choices inherited from the user.
+# This bundle configures no automatic hooks and does not alter global settings.
+# See docs/platform.md for discovery, trust and serial fallback behavior.
