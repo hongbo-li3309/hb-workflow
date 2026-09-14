@@ -1,151 +1,25 @@
 ---
 name: tools
-description: Utility commands — commit, compile, validate-bib, lint, journal, context-status, deploy, learn. Replaces individual utility skills.
-argument-hint: "[subcommand: commit | compile | validate-bib | lint | journal | context | deploy | learn | upgrade] [args]"
-allowed-tools: Read,Grep,Glob,Write,Edit,Bash,Task
+description: Maintain the research workspace with scoped Git actions, compilation, bibliography checks, lint, context handoff, workflow learning and reviewed upgrades.
+argument-hint: "[commit | compile | validate-bib | lint | journal | context | deploy | learn | upgrade] [args]"
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash, Agent, WebSearch, WebFetch
 ---
-
 # Tools
 
-Utility subcommands for project maintenance and infrastructure.
+Use the requested subcommand; do not launch the paper pipeline for maintenance. Preserve existing user changes and actual authorization.
 
-**Input:** `$ARGUMENTS` — subcommand followed by any arguments.
+| Subcommand | Action |
+|---|---|
+| `commit` | Inspect status/diff, run relevant checks, stage explicit related paths, commit. Push if authorized. A commit request alone does not authorize PR merge or public deployment. |
+| `compile [file]` | Use the specified document's build command; for new LaTeX skeletons run `latexmk` in its directory. Preserve the compiler exit status and inspect the rendered result. No unrelated paper compilation. |
+| `validate-bib` | Compare citation keys with bibliography; check duplicate identities/versions. Existence of a BibTeX entry does not verify that the source supports its sentence. Verify substantive citations from original sources when needed. |
+| `lint [path]` | Run `.claude/hooks/lint-scripts.sh` for scoped advisory checks, including Stata. Lexical warnings need review; absence of warnings does not mean execution passed. |
+| `journal` | Summarize real decisions and results from current state/evidence; preserve historical logs rather than manufacturing a timeline of agent scores. |
+| `context` | Report current task, active plan, modified artifacts, evidence state and next step. Do not claim access to a context usage counter if none is available. |
+| `learn` | Extract confirmed, reusable workflow preferences into MEMORY or a proposed skill; distinct from economic learning via `/learn`. |
+| `deploy` | Prepare and verify the guide/site using its build tools; publish only under an explicit existing deployment authorization. |
+| `upgrade` | Inspect local customization and candidate version, prepare file-level diffs, preserve names/paths/custom state; apply only scoped changes. Never delete the entire `.claude/` directory. |
 
----
+For library checks: `python3 scripts/validate_workflow.py` and `python3 -m unittest discover -s tests`. From the workflow library, create new projects with `python3 scripts/new_project.py <destination> --lang stata` (or the chosen language); generated research projects do not contain this library initializer or its tests. Do not modify shell startup files or global client configuration unless requested.
 
-## Subcommands
-
-### `/tools commit [message]` — Git Commit
-Stage changes, create commit, optionally create PR and merge.
-- Run git status to identify changes
-- Stage relevant files (never stage .env or credentials)
-- Create commit with descriptive message
-- If quality score available and >= 80, note in commit
-
-### `/tools compile [file]` — LaTeX Compilation
-Automated multi-pass compilation via latexmk.
-
-For papers:
-```bash
-cd paper && latexmk [file]
-```
-
-For talks:
-```bash
-cd paper/talks && latexmk [file]
-```
-
-Note: `paper/latexmkrc` configures XeLaTeX, TEXINPUTS, and BIBINPUTS. Falls back to manual 3-pass if latexmk is unavailable.
-
-### `/tools validate-bib` — Bibliography Validation
-Cross-reference all \cite{} keys in paper and talk files against Bibliography_base.bib.
-Report: missing entries, unused entries, duplicate keys.
-
-### `/tools lint [file|dir]` — Mechanical Code Linting
-Run grep-based checks on R/Python/Julia scripts against the coding standards' prohibited patterns. Catches mechanical violations before the coder-critic's judgment review.
-
-```bash
-"$CLAUDE_PROJECT_DIR"/.claude/hooks/lint-scripts.sh [target]
-```
-
-- **Single file:** `/tools lint scripts/02_estimate.R`
-- **Directory:** `/tools lint scripts/` (recursive)
-- **Default:** `/tools lint` (lints `scripts/`)
-
-**What it checks (drawn from `.claude/references/coding-standards-*.md`):**
-
-| Check | R | Python | Julia | Severity |
-|-------|---|--------|-------|----------|
-| Absolute paths | x | x | x | HIGH |
-| `setwd()` / `os.chdir()` / `cd()` | x | x | x | HIGH |
-| Missing seed (stochastic code) | x | x | x | HIGH |
-| `install.packages()` / `pip install` | x | x | | HIGH |
-| `rm(list = ls())` | x | | | MEDIUM |
-| `T`/`F` literals | x | | | MEDIUM |
-| `sapply()` | x | | | MEDIUM |
-| `attach()`/`detach()` | x | | | MEDIUM |
-| `<<-` global assignment | x | | | MEDIUM |
-| `stargazer` / `plyr` | x | | | MEDIUM |
-| `set.seed()` position (after line 30) | x | | | MEDIUM |
-| Wildcard imports | | x | | MEDIUM |
-| `np.random.seed()` global state | | x | | MEDIUM |
-| Bare `except:` | | x | | MEDIUM |
-| `eval`/`@eval` runtime | | | x | MEDIUM |
-| Late `library()`/`import`/`using` | x | x | x | LOW |
-| `print()` for status | x | | | LOW |
-| `require()` | x | | | LOW |
-| `1:n` patterns | x | | | LOW |
-
-**Output:** Findings by file with severity, line number, and fix suggestion. Always advisory (exit 0).
-
-**When to use:**
-- Before `/review --code` — catches mechanical violations instantly
-- Before commits — quick sanity check
-- The coder-critic focuses on judgment (strategy alignment, numerical plausibility, design); this catches the grep-able stuff
-
-### `/tools journal` — Research Journal
-Regenerate the research journal timeline from quality reports and git history.
-Shows chronological record of agent actions, phase transitions, scores, decisions.
-
-### `/tools context` — Context Status
-Show current context status and session health.
-Check context usage, whether auto-compact is approaching, what state will be preserved.
-
-### `/tools deploy` — Deploy Guide Site
-Render Quarto guide site and publish to GitHub Pages.
-```bash
-cd guide && quarto publish gh-pages --no-browser
-```
-
-### `/tools learn` — Extract Learnings
-Extract reusable knowledge from the current session. Auto-memory handles corrections automatically; this is for multi-step workflows worth turning into a full skill.
-
-### `/tools upgrade` — Upgrade Clo-Author Infrastructure
-Upgrade an existing project to the latest clo-author architecture.
-
-**What it does:**
-1. Clone the latest clo-author release into a temp directory
-2. Save the user's filled-in domain-profile.md and any custom journal profiles
-3. Delete the old `.claude/` directory
-4. Copy the new `.claude/` in
-5. Restore the user's domain-profile.md and custom journal profiles
-6. Optionally copy new `templates/`
-7. Report what changed
-
-**Workflow:**
-```
-Step 1: DOWNLOAD
-  - Clone latest clo-author into /tmp/clo-author-upgrade
-  - Or: gh release download --repo hugosantanna/clo-author
-
-Step 2: PRESERVE USER CUSTOMIZATIONS
-  - Save .claude/references/domain-profile.md if filled in (not just placeholders)
-  - Save any custom journal profiles the user added to journal-profiles.md
-  - Save .claude/settings.json (user's permissions and hooks)
-  - Save .claude/settings.local.json if it exists
-
-Step 3: REPLACE
-  - Delete old .claude/ entirely
-  - Copy new .claude/ from the downloaded release
-  - Restore saved customizations from Step 2
-
-Step 4: DO NOT TOUCH
-  - paper/, scripts/, data/, explorations/, quality_reports/
-  - CLAUDE.md, Bibliography_base.bib, README.md, .gitignore
-  - Any other user content
-
-Step 5: REPORT
-  - List what was updated (new agents, skills, rules)
-  - List what was preserved (domain profile, settings, custom profiles)
-  - Clean up temp directory
-```
-
-**No git merge. No upstream remote. No conflicts.** Just delete and replace `.claude/`.
-
----
-
-## Principles
-- **Each subcommand is lightweight.** No multi-agent orchestration needed.
-- **Compile uses latexmk.** Handles multi-pass and biber automatically.
-- **validate-bib catches drift.** Run before commits to catch broken citations.
-- **Upgrade preserves content.** Infrastructure changes, your paper doesn't.
+When a tool is missing, say which action is NOT_RUN and provide the next concrete command; continue independent work. Do not mask nonzero exit codes with `tail` or `|| true`, claim automatic Git hooks are installed when they are not, or promise a conflict-free upgrade.

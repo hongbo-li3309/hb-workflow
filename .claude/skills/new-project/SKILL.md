@@ -1,145 +1,42 @@
 ---
 name: new-project
-description: Full research pipeline from idea to paper. Orchestrates all phases — discovery, strategy, analysis, writing, peer review, and submission. Use when starting a new research project from scratch.
-argument-hint: "[research topic or 'interactive' for guided start]"
-allowed-tools: Read,Grep,Glob,Write,Edit,Bash,Task,WebSearch,WebFetch
+description: Start an economics research project with a concise brief and the first useful stage of work, or coordinate a longer explicitly authorized scope. Supports empirical, theoretical, and measurement projects.
+argument-hint: "[research topic | existing project path | interactive]"
+allowed-tools: Read,Grep,Glob,Write,Edit,Bash,Agent,WebSearch,WebFetch
 ---
 
 # New Project
 
-Launch a full research pipeline from idea to paper, orchestrated through the dependency graph.
+输入：`$ARGUMENTS`。默认建立研究设定并完成第一阶段具体工作；执行范围由用户任务决定，不从一个想法自动跑到投稿。
 
-**Input:** `$ARGUMENTS` — a research topic or `interactive` for a guided start via `/discover interview`.
+先读已有项目入口、指定主稿和 `research/PROJECT_BRIEF.md`；按需读 [研究协作](../../references/research-collaboration.md)。保留用户文件、目录和已确认设定。已有论文项目不重新初始化；路径不清楚时先检查工作目录，避免把工作流模板库写成实际论文项目。
 
----
+## 建立可讨论的起点
 
-## Pipeline Overview
+1. 从上下文提炼一句问题、经济重要性、当前机制与替代解释、可用材料、关键未知、近期可交付工作。研究类型可以是实证、理论、结构、测量或混合，不要求先选熟悉的识别方法。
+2. 信息足够时直接写约一页 `research/PROJECT_BRIEF.md`，未知项显式保留。只有答案决定接下来能否开展时才澄清关键问题；`interactive` 是对话入口，不是固定问卷。
+3. 默认完成一个最有价值的初步任务，如前沿地图、数据可行性检查、机制小模型或既有结果诊断。独立文献/数据搜索可并行，涉及共同文件的综合由当前协调者完成。
+4. 有实质证据或重大选择后再建立 `research/EVIDENCE_LEDGER.md` 和 `research/DECISIONS.md`；空项目不批量生成假状态。模板目录提供结构，按需使用。
 
-This skill orchestrates the full dependency graph. Each phase activates when its dependencies are met. The orchestrator manages agent dispatch, three-strikes escalation, and quality gates.
+若用户要求先计划，先保存可审阅 Markdown 计划并等待确认；否则复杂任务可以简短记录范围和步骤，不把“新项目”本身当成强制审批理由。用户已批准的计划无需重新批准。
 
-```
-Phase 1: Discovery
-  ├── /discover interview → Research Spec + Domain Profile
-  ├── /discover lit → Literature Synthesis + BibTeX
-  └── /discover data → Data Assessment
+## 按实际依赖推进
 
-Phase 2: Strategy (depends on Phase 1)
-  ├── /strategize → Strategy Memo + Robustness Plan
-  └── /strategize theory → Theory Section (conditional — econometric methods, theory+empirics, structural, methodological reduced-form)
+| 当前需要 | 入口与证据 |
+|---|---|
+| 找问题、文献、数据 | `/discover`；产物进入 literature/data-assessment 或 brief |
+| 解释机制、识别与主线 | `/strategize`；strategy/theory 明确条件与未知 |
+| 理解陌生概念或工具 | `/learn`；先直觉、再推导、最后回到项目 |
+| 实现已定的分析 | `/analyze`；关键样本、规格和输出可追溯 |
+| 提纲、草稿、编辑 | `/write`；按语言、体例、领域与读者选择，不以代码完成为所有写作的前提 |
+| 核验与独立审查 | `/review`、`/tools`；按主张所需证据检查 |
+| 报告、修订或提交准备 | `/talk`、`/revise`、`/submit`；沿用用户指定主稿与授权范围 |
+| 交接 | `/checkpoint`；更新最少状态与下一步 |
 
-Phase 3: Execution (depends on Phase 2)
-  ├── /analyze → Scripts + Tables + Figures
-  └── /write → Paper Sections
+已有证据可以直接进入写作，纯理论无需先完成数据环节。需要真实结果支持的段落必须等待可靠输出，暂不能支持的主张使用明确占位。不能用综合分或 agent 意见自动替研究者选贡献、主样本、主规格或投稿目标。
 
-Phase 4: Peer Review (depends on Phase 3)
-  ├── /review --all → Comprehensive Quality Score
-  └── /review --peer → domain-referee + methods-referee Reports
+## 每个阶段结束时
 
-Phase 5: Submission (depends on Phase 4, score >= 95)
-  ├── /submit target → Journal Recommendations
-  ├── /submit package → Replication Package
-  └── /submit final → Final Verification
-```
+说明获得了什么、证据的局限、当前主线及首选下一步。给陌生工具的学习入口，必要时提出有机制和最小检验的新方向。分支暂存及重开条件在已有材料中简短记录，不为每个灵感启动完整 pipeline。
 
----
-
-## Workflow
-
-### Step 0: Enter Plan Mode
-
-Before any work begins:
-1. **Enter plan mode** — use `EnterPlanMode`
-2. **Create the project folder structure** — `data/raw/`, `data/cleaned/`, `scripts/R/`, `paper/sections/`, `paper/figures/`, `paper/tables/`, etc.
-3. **Draft a high-level plan** — what phases are needed, estimated scope
-4. **Save to disk** — `quality_reports/plans/YYYY-MM-DD_new-project.md`
-5. **Present to user** — wait for approval before proceeding
-6. **Exit plan mode** — only after approval
-
-### Step 1: Discovery Phase
-
-1. **If `interactive` or no research spec exists:**
-   Run `/discover interview` to produce:
-   - Research specification (`quality_reports/research_spec_*.md`)
-   - Domain profile (`.claude/references/domain-profile.md`) — if still template
-
-2. **Run `/discover lit`** with the research topic:
-   - Librarian collects literature
-   - librarian-critic reviews coverage
-   - Output: literature synthesis + BibTeX entries
-
-3. **Run `/discover data`** to find datasets:
-   - Explorer searches for data sources
-   - explorer-critic assesses data quality
-
-**Gate:** Research spec and literature review must exist before proceeding.
-
-### Step 2: Strategy Phase
-
-4. **Run `/strategize`** to design the empirical strategy:
-   - Strategist proposes identification strategy
-   - strategist-critic validates the design
-
-4b. **If paper type is econometric methods, theory+empirics, structural, or methodological reduced-form:**
-   **Run `/strategize theory`** to produce the formal theory section:
-   - Theorist drafts assumptions, theorems, proofs
-   - theorist-critic audits proof validity (4 phases, early-stop on critical gaps)
-   - Theorist-critic score contributes 20% to the weighted aggregate when present (see `quality.md`)
-
-   Skip this step for applied papers using off-the-shelf estimators.
-
-**Gate:** Strategy memo must pass strategist-critic review (score >= 80). If theory section exists, theorist-critic must also pass (score >= 80).
-
-### Step 3: Execution Phase
-
-5. **Run `/analyze`** to implement the strategy:
-   - Data-engineer cleans data and creates figures
-   - Coder writes analysis scripts
-   - coder-critic reviews code
-
-6. **Run `/write`** to draft the paper:
-   - Writer drafts sections
-   - Humanizer pass strips AI patterns
-
-**Gate:** Code must pass coder-critic review. Paper sections must exist.
-
-### Step 4: Peer Review Phase
-
-7. **Run `/review --all`** for comprehensive review:
-   - strategist-critic + coder-critic + writer-critic + Verifier in parallel
-   - Weighted aggregate score computed
-
-8. **Run `/review --peer`** for simulated peer review:
-   - domain-referee (subject expertise) + methods-referee (econometrics)
-   - Independent, blind reports
-   - Orchestrator synthesizes editorial decision
-
-**Gate:** Aggregate score >= 80 (commit-ready). Score >= 90 for submission.
-
-### Step 5: Submission Phase (optional, user-triggered)
-
-9. **Run `/submit target`** for journal recommendations
-10. **Run `/submit package`** for replication package
-11. **Run `/submit final`** for final verification
-
----
-
-## User Interaction Points
-
-The pipeline pauses for user input at these points:
-- After interview (approve research spec)
-- After strategy memo (approve identification strategy)
-- After data analysis (review results before paper drafting)
-- After peer review (review feedback before revision)
-- Before submission (approve journal choice)
-
-Between pauses, the orchestrator runs autonomously per `workflow.md`.
-
----
-
-## Principles
-
-- **This is always orchestrated.** Unlike other skills, `/new-project` always runs through the full pipeline.
-- **Dependency-driven.** Phases activate by dependency, not forced sequence.
-- **Quality-gated.** Each phase transition requires passing quality checks.
-- **User retains control.** Pipeline pauses at key decision points.
-- **Resumable.** If interrupted, the pipeline resumes from the last completed phase.
+常规工作在已有授权内继续；重大路线变化先准备证据、备选与成本供 Hongbo 判断。公开发布、对外发送、登记或正式投稿依照明确授权执行，项目初始化本身不授权创建远端或上传研究内容。检查按 `PASS` / `FAIL` / `NOT_RUN` / `NOT_APPLICABLE` 记录，输入变化的旧判断标 `STALE`。

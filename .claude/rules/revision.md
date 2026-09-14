@@ -1,40 +1,9 @@
-# Revision Protocol — R&R Cycle
+# Revision — 主稿、版本与作者判断
 
-**When referee reports arrive, `/revise` classifies each comment and routes it to the right agent.**
+先确定用户指定主稿及任务：诊断、局部修改、结构改写还是R&R。没有主稿信息但可从上下文确定就继续；确实无法确定时先完成独立诊断，再问必要问题。
 
-## Comment Classification
+论文/报告编辑默认另存修订版本，例如 `paper/revisions/YYYY-MM-DD_<purpose>/`；保留基准及相关依赖，确保新入口可编译/打开。对LaTeX多文件稿可另存变更的section并生成引用正确的修订入口，不必复制数据和全部分析。使用文本diff、latexdiff或Word修订功能中实际可用的方式，不能声称保留了未生成的修订记录。文件名与编译入口在交付中说明。
 
-| Classification | What It Means | Routed To |
-|---------------|---------------|-----------|
-| **NEW ANALYSIS** | Requires new estimation or data work | Coder → coder-critic |
-| **CLARIFICATION** | Text revision sufficient | Writer → writer-critic |
-| **DISAGREE** | Diplomatic pushback needed | Flagged for User review |
-| **MINOR** | Typos, formatting | Writer |
+改变结构与润色不得改变estimand、样本、单位、标准误、结论边界或作者意图。实质变化另列理由供用户判断，明确用户确认后才成为新的主稿。用户明确指定直接编辑时遵循其要求并保留可审阅diff。
 
-## The R&R Flow
-
-```
-Referee reports arrive (real, not simulated)
-        │
-        ▼
-   /revise classifies each comment
-        │
-        ├── NEW ANALYSIS → Coder → coder-critic → Writer updates
-        ├── CLARIFICATION → Writer → writer-critic
-        ├── DISAGREE → User decides → diplomatic response drafted
-        └── MINOR → Writer
-        │
-        ▼
-   Revised paper → writer-critic → Orchestrator re-checks
-        │
-        ▼
-   Response letter produced
-```
-
-## Rules
-
-- This uses the same agents but in a targeted way — not a full pipeline restart
-- Each comment gets its own routing — a single referee report may trigger multiple agent pairs
-- The response letter maps each referee comment to the specific change made
-- DISAGREE items are always flagged for user review — Claude never autonomously pushes back on referees
-- The Orchestrator tracks which comments are resolved and which are pending
+R&R按评论追踪：来源/编号、问题、回应方案、依赖、改动位置、实际完成证据。解释范围扩张会改变什么，不自动为每条意见新增模型。回应信只声称实际完成的工作；未执行明确pending。reviewer提出的怀疑与已证实错误区分，详见 `/revise`。

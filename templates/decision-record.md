@@ -1,37 +1,14 @@
-# Decision Record — [Stage]: [Short Title]
+# 研究决定 — [题目]
 
-**Date:** [YYYY-MM-DD]
-**Stage:** [Discovery / Strategy]
-**Decided by:** [User + agent]
+追加到 `research/DECISIONS.md`；只为重要选择写记录。
 
----
+- 日期：[日期]
+- 状态：proposed / approved / superseded
+- 选择与原因：[经济问题/主规格/资源投入等具体选择]
+- 确认人及依据：[用户明确确认的日期/上下文；AI推荐仍为proposed]
+- 替代方案与代价：[有意义的备选及没有采用的理由]
+- 依据：[文献/结果/约束链接；区分事实与假设]
+- 重开条件：[什么新证据会改变选择]
+- 替代的旧决定：[如有，链接旧条目，保留历史]
 
-## Decision
-
-[One sentence: what was chosen.]
-
-## Context
-
-[Why this decision was needed. What question triggered it.]
-
-## Alternatives Considered
-
-| Alternative | Why rejected |
-|-------------|-------------|
-| [Option A] | [Specific reason — not just "less good"] |
-| [Option B] | [Specific reason] |
-| [Option C] | [Specific reason] |
-
-## Key Assumptions
-
-1. [Assumption that must hold for this choice to be correct]
-2. [Another assumption]
-
-## What Would Invalidate This
-
-- [If X happens, reconsider — e.g., "if pre-trends fail, DiD is not credible"]
-- [If Y is discovered — e.g., "if a valid instrument surfaces, IV becomes viable"]
-
-## Approved By
-
-[User, date]
+计划批准只覆盖其明确范围，不把所有后续研究判断自动批准。

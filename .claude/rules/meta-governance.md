@@ -1,20 +1,9 @@
-# Meta-Governance: This Repository's Dual Nature
+# Library 与具体研究项目
 
-This repository is both a working project and a public template for empirical economics research. It can be adapted to adjacent fields (finance, accounting, marketing, management) by customizing the domain profile and journal profiles.
+这是 Hongbo 的个人研究工作流库，源自 clo-author 和 Pedro Sant’Anna 的工作流。原目录为 Claude 版，`gpt-workflow/` 为独立 GPT/Codex 版。维护时保留既有 Claude 文件名、命令名和位置；两个版本各自验证，不自动同步运行状态。
 
-## Working Project
-- We develop research papers, seminars, guides, and documentation
-- We accumulate project-specific learnings and institutional context (UAB)
-- We test and iterate on the architecture itself
+库中保存可复用的规则、技能、参考和模板；真实研究的题目、数据、结论及决定只属于具体项目。用户最新明确说明优先，不把模板例子、上游作者背景或 AI 猜测写成事实。
 
-## Public Template
-- Others fork this repo to run their own research workflows
-- They share the same pipeline (identify → estimate → write → submit) and tools (LaTeX, R/Python/Julia, Beamer)
-- Field-specific differences (journals, methods, conventions) are handled by `.claude/references/domain-profile.md` and `.claude/references/journal-profiles.md`
+机器路径、凭据和临时状态放本机忽略文件；配置示例不能含密钥。既有未提交工作先保留，再按授权范围编辑和明确暂存。不会为了“升级”删除整个配置目录；按文件查看差异并保留定制。
 
-## The One Rule
-
-Before committing, ask: **would another empirical researcher forking this repo benefit from this?**
-
-- **Yes** → commit (workflow patterns, skills, agents, rules, templates)
-- **No** → keep local in `.claude/state/` (machine paths, tool versions, institutional requirements, API keys)
+共同研究原则改变时检查两版；平台特定能力分别维护。历史日志可记载旧规则，但不再作为当前命令的前置条件。

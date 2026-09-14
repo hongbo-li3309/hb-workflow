@@ -1,301 +1,86 @@
 ---
-title: "Architecture Reference"
-subtitle: "How the System Works"
+title: "架构与验证"
+subtitle: "少量当前状态，按需上下文，可核实的执行记录"
 ---
 
-# System Overview
-
-Six configuration layers control behavior --- from CLAUDE.md (loaded every session) to hooks (event-driven). See the [Customization Guide](customization.qmd) for the full breakdown.
-
----
-
-# Agent Workflow Diagram
-
-How 17 agents coordinate across the research pipeline. Each phase pairs **workers** (who create) with **critics** (who review). The **Orchestrator** manages dispatch, quality gates, and escalation. For detailed descriptions of each agent, see [Meet the Agents](agents.qmd).
-
-## The Pipeline
+## 研究判断如何推进
 
 ```{mermaid}
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1a36', 'primaryTextColor': '#00f0ff', 'primaryBorderColor': '#00f0ff', 'lineColor': '#b44dff', 'secondaryColor': '#14142a', 'tertiaryColor': '#080810', 'edgeLabelBackground': '#080810', 'clusterBkg': '#0c0c18', 'clusterBorder': '#1e1e35'}}}%%
 flowchart LR
-    YOU:::start --> D:::phase1
-    D --> S:::phase2
-    S --> E:::phase3
-    E --> R:::phase4
-    R -->|score >= 95| SUB:::phase5
-    R -.->|missing lit| D
-    R -.->|flawed ID| S
-    R -.->|more checks| E
-    E -.->|parallel| T:::talks
-
-    YOU((You))
-    D(Discovery)
-    S(Strategy)
-    E(Execution)
-    R(Peer Review)
-    SUB(Submission)
-    T(Talks)
-
-    classDef start fill:#080810,stroke:#ff2d7b,color:#ff2d7b,stroke-width:2px
-    classDef phase1 fill:#14142a,stroke:#00f0ff,color:#00f0ff,stroke-width:2px
-    classDef phase2 fill:#14142a,stroke:#00cc66,color:#00cc66,stroke-width:2px
-    classDef phase3 fill:#14142a,stroke:#b44dff,color:#b44dff,stroke-width:2px
-    classDef phase4 fill:#14142a,stroke:#ff2d7b,color:#ff2d7b,stroke-width:2px
-    classDef phase5 fill:#14142a,stroke:#00f0ff,color:#00f0ff,stroke-width:2px
-    classDef talks fill:#0c0c18,stroke:#8888a8,color:#8888a8,stroke-width:1px,stroke-dasharray: 5 5
+    A[研究者的问题与授权] --> B[机制与竞争解释]
+    B --> C[检索、推导或分析]
+    C --> D[证据与必要核查]
+    D --> E[更新当前主线]
+    E --> F[下一步与待决定事项]
+    F --> A
+    D --> B
 ```
 
-## Agents by Phase
+研究过程可以反复修正。理论稿无需先有数据，描述性研究无需承诺因果，证据可以推翻主线。独立 agents 只在有价值时加入。
 
-Each phase dispatches **worker → critic** pairs. The worker creates; the critic reviews (read-only, never edits). If they can't agree after 3 rounds, the Orchestrator escalates.
+## 文件各自负责什么
 
-### Phase 1: Discovery
+| 位置 | 职责 |
+|---|---|
+| `CLAUDE.md` | 简短协作原则、项目事实和入口 |
+| `.claude/rules/` | 跨任务底线、状态和输出契约 |
+| `.claude/skills/` | 12 个按任务调用的流程 |
+| `.claude/agents/` | 20 个按需使用的角色 |
+| `.claude/references/` | 相关时才加载的领域、方法、写作和语言细节 |
+| `templates/` | 项目和记录的统一模板来源 |
+| `research/` | 当前主线、重要证据与决定 |
+| `quality_reports/reviews/` | 人读审查和问题说明 |
+| `quality_reports/runs/` | 机器运行 JSON、完整日志与执行证据 |
+| `.claude/state/` | 本地任务指针和会话快照 |
 
-| Worker | What it creates | Critic | What it checks |
-|--------|----------------|--------|----------------|
-| **Librarian** | Bibliography, frontier map | **librarian-critic** | Coverage, gaps, recency |
-| **Explorer** | Data sources, feasibility | **explorer-critic** | Measurement, sample, ID fit |
+真实代码输出是数值来源，用户指定稿件是呈现主稿。发生冲突时查清原因，不能让旧稿中的数字覆盖新结果。
 
-### Phase 2: Strategy
+## 三份研究状态
 
-| Worker | What it creates | Critic | What it checks |
-|--------|----------------|--------|----------------|
-| **Strategist** | Strategy memo (4 paper types) | **strategist-critic** | Assumptions, inference, sanity (type-specific) |
+`PROJECT_BRIEF.md` 保持约一页，通常最先创建。有重要证据后，用 `EVIDENCE_LEDGER.md` 关联来源、样本、单位、规格及支持或反驳的主张。重大选择才写 `DECISIONS.md`，记录理由、确认人和重开条件。
 
-### Phase 3: Execution
+用链接连接材料，不反复抄写同一个决定。最新用户说明优先于旧记忆；候选机制与 AI 推测有明确身份。
 
-| Worker | What it creates | Critic | What it checks |
-|--------|----------------|--------|----------------|
-| **Data-engineer** | Cleaning scripts, figures | **coder-critic** | Code quality, reproducibility |
-| **Coder** | Analysis scripts, tables (numerical discipline) | **coder-critic** | Strategy alignment, 16 checks incl. numerical discipline |
-| **Writer** | Paper sections (argument moves, 4 types) | **writer-critic** | 8 checks: structure, coherence, design completeness |
+## 验证状态
 
-### Phase 4: Peer Review
+| 状态 | 意思 |
+|---|---|
+| PASS | 明确的检查有当前证据支持通过 |
+| FAIL | 发现具体错误或缺失的预期行为 |
+| NOT_RUN | 未执行，或缺少可核验的运行证据 |
+| NOT_APPLICABLE | 对当前任务不适用，并说明理由 |
+| STALE | 相关输入已经变化，旧证据需重新核验 |
 
-| Agent | Focus | Role |
-|-------|-------|------|
-| **Editor** | Desk review, scope, referee assignment | Assigns dispositions + pet peeves to referees |
-| **domain-referee** | Contributions, literature, external validity | Blind --- doesn't see the other report |
-| **methods-referee** | Identification, estimation, robustness | Blind --- doesn't see the other report |
+静态检查、分析执行、稿件编译、视觉检查和经济判断分别报告，不存在自动加权分数通关。若只检查声明的文件，其他依赖不会因此得到验证。
 
-The Editor does desk review first, then dispatches referees with dispositions (Structuralist, Credibility, Measurement, Policy, Theory, Skeptic). After reports return, the Editor synthesizes the editorial decision, classifying issues as FATAL / ADDRESSABLE / TASTE.
+`scripts/run_check.py` 保存 argv、工作目录、退出码、日志、输入输出指纹和耗时，拒绝覆盖旧记录。预期输出未生成、为空或只是原来的旧文件时不能 PASS。它不自动安装依赖或获得额外权限。调用见[命令参考](reference.qmd)。
 
-### Phase 5: Submission
+## Hooks 的范围
 
-| Agent | What it does | Scoring |
-|-------|-------------|---------|
-| **Verifier** | 10-check AEA replication audit | Pass/fail (binary) |
+| 事件 | 行为 |
+|---|---|
+| PreToolUse | 保护既有 raw、审稿原件、approved 材料和 review 历史，覆盖直接 Edit/Write/NotebookEdit |
+| PostToolUse | 静态代码提示，包括 Stata `.do/.ado`；不运行分析 |
+| PreCompact | 从明确活动任务保存当前项目/session 快照 |
+| SessionStart | 在 `source=compact` 或 `resume` 时恢复匹配快照，保留供重复恢复 |
 
-### Talks (parallel with Peer Review)
+保护允许首次创建材料，不按 basename 误拦普通 settings。Bash、MCP 和外部写入不在窄范围 guard 的覆盖内；它不是完整安全隔离，也不能通过换工具规避。详见 `.claude/hooks/README.md` 与 [Claude 官方 hooks reference](https://code.claude.com/docs/en/hooks)。
 
-| Worker | What it creates | Critic | What it checks |
-|--------|----------------|--------|----------------|
-| **Storyteller** | Beamer + Quarto slides (4 formats) | **storyteller-critic** | Narrative, visuals, fidelity |
+快照按规范化项目路径与真实 `session_id` 区分。未知或未绑定指针只提供项目线索；恢复仍核对最新用户任务和 Git 差异，不借用其他会话授权。
 
-## The Worker-Critic Loop
+## 执行与复现
 
-```{mermaid}
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#14142a', 'primaryTextColor': '#d0d0e0', 'primaryBorderColor': '#b44dff', 'lineColor': '#b44dff', 'secondaryColor': '#0c0c18', 'tertiaryColor': '#080810', 'edgeLabelBackground': '#080810'}}}%%
-flowchart TD
-    W[WORKER creates artifact]:::worker --> C[CRITIC reviews, scores 0-100]:::critic
-    C -->|score >= 80| A([APPROVED]):::approved
-    C -->|score < 80| F[WORKER fixes issues]:::worker
-    F --> C2[CRITIC re-reviews]:::critic
-    C2 -->|pass| A
-    C2 -->|fail, round 3| ESC([ESCALATE to user]):::escalate
+MCP 是通道，分析逻辑仍保存为脚本。Stata 支持实际可用的 MCP，也支持已安装且有许可的 batch 程序。启动程序返回零不一定足够，仍需检查日志中的脚本错误。
 
-    classDef worker fill:#14142a,stroke:#b44dff,color:#b44dff,stroke-width:2px
-    classDef critic fill:#14142a,stroke:#00f0ff,color:#00f0ff,stroke-width:2px
-    classDef approved fill:#14142a,stroke:#00cc66,color:#00cc66,stroke-width:2px
-    classDef escalate fill:#14142a,stroke:#ff2d7b,color:#ff2d7b,stroke-width:2px
+Stata 的 `version` 不固定用户 ado 包；实际依赖、来源和版本需要可追踪。其他语言也记录实际环境。打包参考 [AEA Data Editor 依赖说明](https://aeadataeditor.github.io/aea-de-guidance/preparing-replication-package-step3)，投稿时再查适用要求。模拟数据 smoke test 不代替真实数据上的完整执行。
+
+## 库维护检查
+
+以下命令在工作流库根目录运行：
+
+```bash
+python3 scripts/validate_workflow.py
+python3 -m unittest discover -s tests
 ```
 
-**Why it works:** The critic can't fix files (read-only), so it has no incentive to downplay issues. The worker can't approve itself (the critic re-audits). This prevents Claude from saying "looks good" about its own work.
-
-**Severity gradient:** Critics calibrate harshness by phase --- encouraging in Discovery, precise in Execution, adversarial in Peer Review.
-
----
-
-# The Orchestrator (Contractor Mode) {#sec-orchestrator}
-
-Once a plan is approved, the orchestrator takes over autonomously, dispatching agents based on the **dependency graph**.
-
-## The Mental Model
-
-Think of the orchestrator as a **general contractor**. You are the client. You describe what you want. The plan-first protocol is the blueprint phase. Once you approve the blueprint, the contractor takes over: hires the right specialists (agents), inspects their work (verification), sends them back to fix issues (review-fix loop), and only calls you when the job passes inspection (quality gates).
-
-The Orchestrator:
-
-- **Dispatches** worker-critic pairs based on the dependency graph
-- **Enforces quality gates**: 80 (commit), 90 (PR), 95 (submission)
-- **Escalates** when pairs can't converge after 3 rounds
-- **Synthesizes** referee reports into editorial decisions
-- **Selects** target journals at submission time
-- **Tracks** the research journal with scores and phase transitions
-
-## Dependency-Driven Dispatch
-
-```{mermaid}
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#14142a', 'primaryTextColor': '#d0d0e0', 'primaryBorderColor': '#b44dff', 'lineColor': '#b44dff', 'secondaryColor': '#0c0c18', 'tertiaryColor': '#080810', 'edgeLabelBackground': '#080810'}}}%%
-flowchart TD
-    P1:::phase --> P2:::phase
-    P2 --> P3:::phase
-    P3 --> P4:::phase
-    P4 -->|score >= 95| P5:::phase
-
-    P1(Discovery)
-    P2(Strategy)
-    P3(Execution)
-    P4(Peer Review)
-    P5(Submission)
-
-    subgraph s1 [" "]
-        direction LR
-        L[Librarian]:::worker ---|reviewed by| LC[librarian-critic]:::critic
-        X[Explorer]:::worker ---|reviewed by| XC[explorer-critic]:::critic
-    end
-
-    subgraph s2 [" "]
-        ST[Strategist]:::worker ---|reviewed by| STC[strategist-critic]:::critic
-    end
-
-    subgraph s3 [" "]
-        direction LR
-        DE[Data-engineer]:::worker ---|reviewed by| CC1[coder-critic]:::critic
-        CO[Coder]:::worker ---|reviewed by| CC2[coder-critic]:::critic
-        WR[Writer]:::worker ---|reviewed by| WC[writer-critic]:::critic
-    end
-
-    subgraph s4 [" "]
-        direction LR
-        ED[Editor]:::infra
-        DR[domain-referee]:::referee
-        MR[methods-referee]:::referee
-    end
-
-    subgraph s5 [" "]
-        VE[Verifier]:::infra
-    end
-
-    P1 --- s1
-    P2 --- s2
-    P3 --- s3
-    P4 --- s4
-    P5 --- s5
-
-    classDef phase fill:#14142a,stroke:#ff2d7b,color:#ff2d7b,stroke-width:2px
-    classDef worker fill:#14142a,stroke:#b44dff,color:#b44dff,stroke-width:1px
-    classDef critic fill:#14142a,stroke:#00f0ff,color:#00f0ff,stroke-width:1px
-    classDef referee fill:#14142a,stroke:#ff2d7b,color:#ff2d7b,stroke-width:1px
-    classDef infra fill:#14142a,stroke:#00cc66,color:#00cc66,stroke-width:1px
-```
-
-Phases activate when dependencies are met, not by forced sequence. Parallel dispatch within phases (e.g., Librarian and Explorer run simultaneously in Phase 1).
-
-## The Loop
-
-```{mermaid}
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#14142a', 'primaryTextColor': '#d0d0e0', 'primaryBorderColor': '#b44dff', 'lineColor': '#b44dff', 'secondaryColor': '#0c0c18', 'tertiaryColor': '#080810', 'edgeLabelBackground': '#080810'}}}%%
-flowchart TD
-    START([Plan approved]):::start --> IMPL[IMPLEMENT]:::step
-    IMPL --> VERIFY[VERIFY: compile, render, check]:::step
-    VERIFY --> REVIEW[REVIEW: worker-critic pairs]:::step
-    REVIEW --> FIX[FIX: critical then major then minor]:::step
-    FIX --> REVERIFY[RE-VERIFY: confirm fixes]:::step
-    REVERIFY --> SCORE[SCORE: weighted aggregate]:::step
-    SCORE -->|score >= threshold| DONE([Present summary]):::approved
-    SCORE -->|score < threshold| REVIEW
-    SCORE -.->|max 5 rounds| DONE
-
-    classDef start fill:#14142a,stroke:#ff2d7b,color:#ff2d7b,stroke-width:2px
-    classDef step fill:#14142a,stroke:#b44dff,color:#b44dff,stroke-width:2px
-    classDef approved fill:#14142a,stroke:#00cc66,color:#00cc66,stroke-width:2px
-```
-
-### Three-Strikes Escalation
-
-If a worker-critic pair can't resolve after 3 rounds:
-
-| Pair | Escalation Target |
-|------|------------------|
-| Coder + coder-critic | → Strategist (design may be wrong) |
-| Writer + writer-critic | → domain-referee (framing may need rethinking) |
-| Strategist + strategist-critic | → User (fundamental design disagreement) |
-| Storyteller + storyteller-critic | → Writer (paper content may need revision) |
-
-### "Just Do It" Mode
-
-When you say "just do it", the orchestrator still runs the full verify-review-fix loop, but skips the final approval pause and auto-commits if the score is >= 80.
-
----
-
-# Plan-First Workflow {#sec-plan-first}
-
-For any non-trivial task, Claude enters plan mode before writing code.
-
-## The Protocol
-
-```
-Non-trivial task arrives
-  │
-  Step 1: Enter Plan Mode
-  Step 2: Draft plan (approach, files, verification)
-  Step 3: Save to quality_reports/plans/YYYY-MM-DD_description.md
-  Step 4: Present plan to user
-  Step 5: User approves (or revises)
-  Step 6: Save initial session log
-  Step 7: Orchestrator takes over (dependency-driven dispatch)
-  Step 8: Update session log + plan status to COMPLETED
-```
-
-Plans are saved to disk so they survive context compression. The rule: **avoid `/clear`** --- prefer auto-compression.
-
-## Session Logging (3 Triggers)
-
-1. **After plan approval** --- create the log with goal, plan summary, rationale
-2. **During implementation** --- append 1--3 lines as design decisions happen
-3. **At session end** --- add what was accomplished, open questions, unresolved issues
-
----
-
-# Parallel Agents
-
-Claude Code can spawn **multiple agents simultaneously** using the Task tool.
-
-## When to Use
-
-| Scenario | Sequential (slow) | Parallel (fast) |
-|----------|-------------------|-----------------|
-| Paper review | Run each agent sequentially | Run strategist-critic + coder-critic + writer-critic + Verifier simultaneously |
-| Literature search | Search one database at a time | Spawn agents for journals, NBER, SSRN |
-| Data exploration | Check one source at a time | Spawn agents for each data category |
-
-The orchestrator recognizes independent subtasks and spawns parallel agents automatically.
-
-## Practical Limits
-
-- **3--4 agents** is the sweet spot. More increases overhead without proportional speedup.
-- Agents are **independent** --- they cannot see each other's work. Dependent tasks run sequentially.
-- Parallel agents multiply token usage.
-
----
-
-# Scoring Protocol {#scoring-protocol}
-
-The weighted aggregate score determines quality gate passage:
-
-| Component | Weight | Agent(s) |
-|-----------|--------|----------|
-| Literature | 10% | Librarian + librarian-critic |
-| Data | 10% | Explorer + explorer-critic |
-| Identification | 25% | strategist-critic |
-| Code | 15% | coder-critic |
-| Paper | 25% | Avg(domain-referee + methods-referee) |
-| Polish | 10% | writer-critic |
-| Replication | 5% | Verifier |
-
-**Missing components:** If a component hasn't been scored (e.g., no literature review yet), its weight is redistributed proportionally across available components.
-
-**Submission gate:** Aggregate >= 95 AND every individual component >= 80.
-
-These numbers run in the background. They prevent broken work from shipping --- you rarely need to think about them directly.
+它们检查配置、路径、初始化和关键故障行为，不能认证创新性、因果识别或文风。新研究项目运行自身分析与核验，不把库维护测试称为论文已经复现。

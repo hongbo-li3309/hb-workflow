@@ -1,69 +1,37 @@
-# Content Invariants
+# Content invariants — 证据底线与呈现约定
 
-These are non-negotiable. Every agent checks against them. Violations are deductions, not suggestions. Critics cite invariant numbers (e.g., "violates INV-3") in their reports.
+保留原 INV 编号供旧审查定位，含义以本版为准。下列格式选择服从用户主稿及经核实的目标要求；不得把模板偏好当成研究正确性的硬门槛。
 
----
+## 稿件
 
-## Paper
+**INV-1.** 实证表格说明变量、单位、样本、数据来源及不确定性/标准误口径。
+**INV-2.** 图形有读者能理解的轴、图例、样本、数据来源及不确定性说明，正文或caption可承担说明。
+**INV-3.** 新经济学表格通常使用清楚的横线与少量装饰；booktabs是可选默认，不强改既有格式。
+**INV-4.** 星号、p值和置信区间按目标要求选择；如有星号定义阈值。统计显著性不等于经济重要性。
+**INV-5.** 摘要长度按语言、体例及目标要求确定，不设跨体例字数限额。
+**INV-6.** JEL和关键词按目标期刊或用户要求填写，不凭空推断。
+**INV-7.** 同一符号和术语的含义保持一致，变量单位与定义可追溯。
+**INV-8.** 因果表述对应识别条件与证据；描述、机制推测、校准和预测分别标记。前趋势不显著不证明平行趋势。
+**INV-9.** 保留主稿的引用系统。新稿可用biblatex/biber，也可沿用目标模板的natbib/bibtex。
+**INV-10.** LaTeX包顺序以实际兼容与编译结果为准；局部润色不重写preamble。
+**INV-11.** 文字与表图来自相同版本和口径；允许明确的合理舍入，不允许旧数字、百分比与百分点混淆。
+**INV-12.** 标题、图注和图内文字共同服务当前读者；论文、独立政策图与幻灯片无需同一种标题布局。
+**INV-13.** 生成表图的脚本与稿件约定输出接口；LaTeX可导出bare tabular，不强制其他体例使用它。
 
-**INV-1.** Every table has notes explaining key variables, sample, and data source — via `threeparttable` + `tablenotes` (traditional) or `talltblr` with `note{}` keys (tabularray).
+## 代码
 
-**INV-2.** Every figure has a `\caption{}` with a note explaining what is shown, how to read it, and the data source.
+**INV-14.** 随机过程使用实际传递/使用的seed或RNG；并行与多阶段设置要可复现，不以“出现一行seed”验收。
+**INV-15.** 依赖清楚，安装与分析分开；实际版本/来源记录到复现说明。
+**INV-16.** 项目路径可迁移。根目录在一个可解释入口确定，机器专用位置在本地配置中，不散落硬编码。
+**INV-17.** 清晰实现优先；规模需要时向量化、预分配或分块。不为小列表/循环强造抽象。
+**INV-18.** 输出写到约定路径，不覆盖原始数据、标准cleaned数据或未经授权的主稿。
+**INV-19.** 不静默吞掉错误或污染全局会话；不在分析中临时升级依赖。不仅按函数名称判断正确性。
+**INV-22.** 样本窗口、处理定义、主结果、控制、固定效应、聚类和带宽等实质设定集中可见。简单一次性表达无需全部宏化。
+**INV-23.** 数据构建与分析分开；子样本/临时变换不得污染下一规格。按语言用preserve/restore、frames或独立对象。
 
-**INV-3.** No `\hline` — use `\toprule`, `\midrule`, `\bottomrule` (booktabs). No vertical rules.
+## 演讲
 
-**INV-4.** Significance stars follow the journal profile. AEA journals: no stars, report standard errors and use confidence intervals. Default: stars with note defining thresholds.
+**INV-20.** 演讲与研究材料术语、单位、符号和定义一致。
+**INV-21.** 幻灯片主张可追溯到核验过的研究证据。新的探索明确标记、注明来源，不能冒充主稿已确认结果。
 
-**INV-5.** Abstract is 150 words or fewer.
-
-**INV-6.** JEL codes and keywords present after the abstract.
-
-**INV-7.** Notation is consistent across all sections — the same symbol means the same thing everywhere. Different concepts get different symbols.
-
-**INV-8.** Every causal claim has a corresponding identification section. No causal language in descriptive papers.
-
-**INV-9.** `biblatex` + `biber`, not `natbib` + `bibtex`.
-
-**INV-10.** `hyperref` loaded second-to-last in preamble; `cleveref` loaded immediately after it.
-
-**INV-11.** Numbers in text match the tables and figures exactly. No rounding discrepancies, no stale values.
-
-**INV-12.** No titles inside ggplot/matplotlib figures. Titles go in LaTeX `\caption{}`. Panel labels ("Panel A: ...") inside multi-panel figures are fine.
-
-**INV-13.** R/Python/Julia scripts export bare `tabular` environments — no `\begin{table}`, `\caption{}`, or notes. The paper's `main.tex` wraps them.
-
-## Code
-
-**INV-14.** `set.seed()` (or language equivalent) called exactly once, at the top of the main script, if any stochastic element exists.
-
-**INV-15.** All packages/libraries loaded at the top of the script, before any data loading or computation.
-
-**INV-16.** No absolute paths. All paths relative to project root via `here()` (R), `pathlib.Path` (Python), `joinpath(@__DIR__, ...)` (Julia), or project-root macros set in a central `_setup.do` (Stata) — typically `$root`, `$rawdata`, `$workingdata`, `$tempdata`, `$figure`, `$table` (lowercase paths; reserve `UPPER_SNAKE_CASE` for tunable constants like `$SEED`, `$N_BOOT`). No `cd` outside `_setup.do`.
-
-**INV-17.** No growing vectors/lists in loops. Pre-allocate result containers or use vectorized operations.
-
-**INV-18.** Output files go to the path specified by the Output Organization setting in `CLAUDE.md`.
-
-**INV-19.** No prohibited functions: `setwd()` / `os.chdir()` / `cd()`, `rm(list = ls())`, `install.packages()` in scripts, `attach()` / `detach()`.
-
-**INV-22.** Spec parameters are declared once as named macros / constants near the top of the script (or in `_setup.do` when shared across scripts) and referenced everywhere downstream. This covers — at minimum — sample-selection filters, time windows, dependent variable(s), treatment definition, control set, fixed-effects set, cluster level, and bandwidth. No hardcoded year ranges, sample filters, or variable names buried inline in `keep if`, `reghdfe`, or `csdid` calls. Stata: `global` for project-wide spec, `local` for script-scoped spec; UPPER_SNAKE_CASE for tunable constants. R/Python/Julia: a CONFIG block (or `_setup` module) of named constants at the top.
-
-**INV-23.** Data processing and analysis are separated. Analysis scripts read cleaned data from disk and never overwrite the canonical cleaned files. If an analysis script needs a transient transformation — subsample, on-the-fly variable construction, reshaping for one estimation, dropping observations for a robustness cut — it wraps the transformation so the in-memory dataset is restored to the as-loaded state before the next estimation runs. Stata: `preserve` / `restore` for short scopes; `frames` for multi-dataset work. R/Python: build a new in-memory object (`data_sub <- ...`, `df_sub = ...`); never mutate the canonical data frame in place across estimations.
-
-## Talk
-
-**INV-20.** Notation in talk matches paper exactly — same symbols, same subscripts, same definitions.
-
-**INV-21.** Every claim on a slide is traceable to the paper. No orphan results or numbers that don't appear in the manuscript.
-
----
-
-## How Agents Use This File
-
-| Agent | Checks | Action on Violation |
-|-------|--------|-------------------|
-| **writer-critic** | INV-1 through INV-13 | Deduct per scoring rubric |
-| **coder-critic** | INV-13 through INV-19, INV-22, INV-23 | Deduct per scoring rubric |
-| **storyteller-critic** | INV-20, INV-21 | Deduct per scoring rubric |
-| **verifier** | INV-9, INV-10, INV-14, INV-15, INV-16, INV-19 | FAIL if present |
-| **lint hook** | INV-14, INV-15, INV-16, INV-19, INV-22, INV-23 | Advisory warning |
+违反事实/证据底线时定位并修复；格式建议要说明阅读收益。审查状态见 `quality.md`，不扣分通关。

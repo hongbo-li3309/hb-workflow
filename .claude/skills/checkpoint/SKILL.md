@@ -1,228 +1,51 @@
 ---
 name: checkpoint
-description: >
-  Session handoff — persists what happened in the current session to memory,
-  SESSION_REPORT.md, and the research journal. Use when wrapping up a work session,
-  before `/compact`, or when the user says "checkpoint", "save progress", "sync",
-  "wrap up", "log this", or "handoff". Optionally pushes to Obsidian if the user
-  has configured `.claude/state/obsidian-config.md`. Does NOT run briefings,
-  calendar, or mail. Just gather, confirm, save.
-argument-hint: "[--auto | --memory-only | --scaffold-only | --dry-run]"
+description: Save a minimal, project-scoped research handoff with the current brief, important evidence and decisions, and an explicit active task pointer. Optional existing memory or Obsidian integration remains opt-in.
+argument-hint: "[--auto | --memory-only | --scaffold-only | --dry-run | --setup-obsidian]"
 allowed-tools: Read,Grep,Glob,Write,Edit,Bash
 ---
 
-# Checkpoint: Session Handoff
+# Checkpoint
 
-Captures what happened in the current session and pushes it to three places (plus optionally a fourth):
+输入：`$ARGUMENTS`。保存真实进展和可恢复的下一步。用户调用本技能即授权更新本项目交接；不再每次先问“是否保存”。默认不向全局目录、Obsidian 或外部应用同步。
 
-1. **Claude Code auto-memory** (`~/.claude/projects/.../memory/`) — learnings for future conversations
-2. **`SESSION_REPORT.md`** (project root) — append-only session log per `.claude/rules/logging.md`
-3. **`quality_reports/research_journal.md`** — agent-invocation trail
-4. **Obsidian vault** (optional, gated) — project-note journal, dashboard, daily journal
+按需读 [研究协作](../../references/research-collaboration.md)。当前任务、用户最新明确指令和已确认决定优先于旧日志、文件时间及 AI 推测。
 
-You are fast and minimal. One confirmation prompt, then save.
+## 恢复与保存
 
----
+1. 确定实际项目根目录与当前会话任务；读取当前 `research/PROJECT_BRIEF.md`、相关 DECISIONS/EVIDENCE_LEDGER、显式计划路径及 Git 差异。Git 可以核对文件变化，不能代替判断用户授权。
+2. 仅在内容改变时更新 brief；重要证据和重大决定按各自用途更新。主样本、代码、数据、模型或版本已变时，将受影响旧输出/主张标 `STALE`，不要把历史 `PASS` 带入新输入。
+3. 写 `.claude/state/active-task.json`，用真实绝对项目路径与明确任务指针；没有计划用 `null`，不按“最新修改的计划”猜选。
 
-## Flow
-
-### Step 1: Gather Context
-
-Run these in parallel (single message, multiple Bash calls):
-
-```bash
-basename "$(pwd)"
-git log --oneline -10
-git diff --stat
-git diff --cached --stat
+```json
+{
+  "project_root": "/absolute/path/to/project",
+  "plan_path": "quality_reports/plans/actual-plan.md",
+  "task": "当前已授权的具体任务",
+  "next_action": "下一个可以直接执行的动作"
+}
 ```
 
-Then scan:
-- `CLAUDE.md` header for the project name
-- `quality_reports/plans/` for files modified today
-- `quality_reports/session_logs/` for files modified today (if the project uses session logs)
-- The conversation context for key decisions, corrections, or learnings that qualify for auto-memory
+实际运行时提供可靠会话 ID 时可加 `"session_id": "真实会话ID"`，以绑定指针。不要用猜测或未经支持的环境变量制造 ID。这个文件是项目当前任务指针；会话快照由 hooks 按 project_root 和 session_id 管理，checkpoint 不覆盖其他会话的 snapshot。
 
-### Step 2: Detect Obsidian Configuration
+4. 保存后说明更新了哪些路径、什么已完成、哪些检查为 `FAIL` / `NOT_RUN` / `STALE`、下一步以及待研究者决定的具体事项。没有运行的工作不能写为完成；没有新内容就说明无需重复保存。
 
-Check for `.claude/state/obsidian-config.md`:
+## 并行会话与最少日志
 
-```bash
-test -f .claude/state/obsidian-config.md && echo "OBSIDIAN: configured" || echo "OBSIDIAN: not configured"
-```
+项目公共状态和每个会话的临时任务不同。恢复时核对 project_root 和可靠 session_id；未匹配/未知的 active pointer 仅作项目线索，不能据此继承另一会话任务或授权。未找到已绑定快照时，先读公共 brief，再按当前用户任务开展工作。
 
-If the file exists, read it to extract:
-- Vault path
-- Project-name mapping (working directory → Obsidian project note)
+不要删除已读快照，重复 resume 仍应可恢复。不要把相同决定重写到多份日志；DECISIONS 是决定来源，brief 保持当前摘要，审查/运行报告保留细节链接。旧 `SESSION_REPORT.md`、research journal 和 session logs 保留历史；仅当现有项目明确使用它们且有额外交接价值时简短追加链接。
 
-If the file does not exist, Obsidian integration is inactive for this session. Proceed without it — do not ask the user to set it up unless they invoke `/checkpoint --setup-obsidian` (see below).
+本地状态可能包含路径或研究内容；先检查项目 `.gitignore` 的 state 规则，不把会话状态顺手提交。所有路径均属于当前项目；不因一个 vault 配置存在就获得外部写入权限。
 
-### Step 3: Draft Updates (present to user for confirmation)
+## 兼容旧选项
 
-Present a compact summary:
+| 选项 | 当前行为 |
+|---|---|
+| `--auto` | 与默认一致：在授权范围内直接保存 |
+| `--dry-run` | 只展示拟保存内容，不写文件 |
+| `--memory-only` | 仅整理已配置且获授权的 Claude memory 中的长期偏好/稳定信息；环境不可写时交付建议文本，不假报保存 |
+| `--scaffold-only` | 只保存项目内 brief、必要证据/决定与活动指针；不外部同步 |
+| `--setup-obsidian` | 按现有 `.claude/state/obsidian-config.md.example` 准备本地配置，核验工具是否存在；不安装/连接或上传内容 |
 
-```
-## Checkpoint Summary
-
-**Project:** [name] | **Branch:** [current branch]
-**Session:** [date, ~duration if inferrable]
-**Obsidian:** [configured: path | not configured]
-
-### What happened
-- [bullets from git log + conversation context]
-
-### Memory updates
-- [new learnings to save — or "None"]
-
-### Scaffold updates
-- **SESSION_REPORT.md:** [entry to append]
-- **quality_reports/research_journal.md:** [entry to append — if any agent work happened]
-
-### Obsidian updates
-- [if configured: project note journal entry, dashboard row, daily journal]
-- [if not configured: "Skipped — no .claude/state/obsidian-config.md"]
-```
-
-**Ask the user:** "Look right? I'll save all of this." Wait for confirmation or edits.
-
-Skip confirmation if invoked with `--auto` or the user said "just do it".
-
-### Step 4: Save Everything
-
-Execute all saves. Each section is independent — if one fails, the others still run.
-
-#### 4a. Claude Code Auto-Memory
-
-Check existing memory files first — update rather than duplicate.
-
-**Qualifies for memory:**
-- User corrections or preferences (`feedback` type)
-- Project state that isn't in git (`project` type)
-- External references discovered (`reference` type)
-- User profile updates (`user` type)
-
-**Does NOT go in memory** (per auto-memory rules):
-- Code patterns, file paths, architecture
-- Git history (derivable from `git log`)
-- Debugging solutions (the fix is in the code)
-- Ephemeral task details
-
-Write/update memory files with the standard frontmatter, then update `MEMORY.md` index.
-
-#### 4b. SESSION_REPORT.md
-
-Append-only. If the file doesn't exist, create it with header `# Session Report — [Project Name]`.
-
-Entry format (per `.claude/rules/logging.md`):
-
-```markdown
-## YYYY-MM-DD HH:MM — [Brief Title]
-
-**Operations:**
-- [Scripts run, files created/modified/deleted]
-
-**Decisions:**
-- [Choice made] — [rationale]
-
-**Results:**
-- [Key findings, outputs produced]
-
-**Commits:**
-- `[hash]` [commit message]
-
-**Status:**
-- Done: [what's complete]
-- Pending: [what remains]
-```
-
-#### 4c. quality_reports/research_journal.md
-
-Append only if agent work happened this session (writer, coder, strategist, etc.). Entry format per `logging.md`:
-
-```markdown
-### YYYY-MM-DD HH:MM — [Agent Name]
-**Phase:** [Discovery/Strategy/Execution/Peer Review/Presentation]
-**Target:** [file or topic]
-**Score:** [XX/100 or PASS/FAIL or N/A]
-**Verdict:** [one line — key finding or decision]
-**Report:** [path to full report]
-```
-
-#### 4d. Obsidian (optional, only if `.claude/state/obsidian-config.md` exists)
-
-Follow the project's `obsidian-config.md` for vault path and project mapping. Then:
-
-1. Add journal entry to the matched project note via Obsidian MCP (`obsidian_get_file_contents` → modify → `obsidian_delete_file` + `obsidian_append_content`). Reverse chronological — newest first, after `## Journal` heading.
-2. Update the dashboard (`Home.md`) only if something changed (stage transition, status update, Next Action change, Days in Stage recalc). Sync General Kanban if the project is research-tracked.
-3. Append to today's daily journal (`Journal/YYYY-MM-DD.md`). Create from template if it doesn't exist.
-
-Entry format for project note journal:
-
-```markdown
-### YYYY-MM-DD
-
-**Done:**
-- [concrete accomplishments from this session]
-
-**Next:**
-- [concrete next steps]
-```
-
-Keep it tight — 3–5 bullets per section max.
-
-### Step 5: Confirm
-
-Report what was saved:
-
-```
-Checkpoint saved:
-- Memory: [updated/created N files | no changes]
-- SESSION_REPORT.md: [entry added]
-- research_journal.md: [entry added | skipped — no agent work]
-- Obsidian: [entry added to Project Name | not configured]
-```
-
----
-
-## Flags
-
-| Flag | Effect |
-|------|--------|
-| `--auto` | Skip user confirmation, just save |
-| `--memory-only` | Only update Claude Code memory |
-| `--scaffold-only` | Update memory + SESSION_REPORT + research_journal, skip Obsidian |
-| `--dry-run` | Show what would be saved, don't save |
-| `--setup-obsidian` | Walk the user through creating `.claude/state/obsidian-config.md` from the example template |
-
----
-
-## Obsidian Config Setup (on demand)
-
-When invoked with `--setup-obsidian`:
-
-1. Check if `.claude/state/obsidian-config.md.example` exists; if not, flag and stop.
-2. Copy the example to `.claude/state/obsidian-config.md`.
-3. Walk the user through filling in: vault path, project-name mapping for the current working directory.
-4. Verify Obsidian MCP is connected; if not, point the user to the Obsidian REST API plugin setup.
-5. Confirm `.claude/state/` is in `.gitignore`.
-
-Do NOT run this on every checkpoint — only when the user explicitly opts in.
-
----
-
-## Rules
-
-- **Never invent progress.** Only log what actually happened — from git, conversation, or user confirmation.
-- **Be fast.** The whole checkpoint should take under 60 seconds including user confirmation.
-- **Don't duplicate.** Check existing memory files before creating new ones. Check if today's journal entry already covers this project.
-- **Respect meta-governance.** Fork users get memory + SESSION_REPORT + research_journal out of the box. Obsidian integration is opt-in and gated behind local config.
-- **`.claude/state/obsidian-config.md` is local-only.** It contains user-specific paths and mappings; `.gitignore` keeps it out of commits.
-- **Dashboard is source of truth** for Obsidian project stages (when Obsidian is active). Don't contradict it.
-- **Memory is for future conversations.** Don't save things only useful right now.
-- **Minimal user friction.** One confirmation prompt, not five. Default to "looks right? saving."
-
----
-
-## Precedence
-
-If the user has a user-level `checkpoint` skill at `~/.claude/skills/checkpoint/`, this project-level skill takes precedence when invoked from within clo-author. The user-level skill continues to work for projects that don't have this file.
+长期 memory 仅记录用户明确偏好和稳定事实，不承载瞬时结果或复制整个研究状态。现有 `.claude/state/obsidian-config.md` 可以帮助定位已配置目标，**配置存在本身不是授权**；本次或先前已有明确同步授权且工具可用时才执行。采用读取—局部修改—核对，禁止把删除整篇再重建作为常规同步方式。未授权的外部写入先准备可审阅差异，实际权限机制需要批准时按机制处理。

@@ -1,3 +1,9 @@
+# 2026-09-13 — Hongbo research workflow revision
+
+Claude filenames and commands retained. Research collaboration now centers on questions, mechanisms, evidence and researcher decisions; a learning skill and distinct Chinese/English academic/policy writing guidance added. Numerical score gates replaced by explicit verification states. Hooks, analysis examples, dependency records and project creation corrected. An independent GPT/Codex edition is included under `gpt-workflow/`; its capabilities and validation are documented separately.
+
+Earlier entries below are historical descriptions, not current runtime requirements.
+
 # Changelog
 
 All notable changes to the Clo-Author are documented here.

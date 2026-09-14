@@ -1,28 +1,5 @@
-# Explorations
+# 探索空间
 
-This folder is a **sandbox** for experimental and exploratory work. All new ideas, prototypes, and research experiments go here first — never directly into production folders.
+用于需要代码、推导或数据的候选探索；短讨论无需先建目录。每项探索记录经济问题、竞争解释、判别性证据、实际发现以及停止/重开条件，模板见 `../templates/exploration-readme.md`。
 
-## How It Works
-
-1. **Create a subfolder** for each exploration (e.g., `explorations/new-estimator/`)
-2. **Work freely** — lower quality threshold (60/100) during exploration
-3. **Decide:** graduate to production (80/100 required), keep exploring, or archive
-
-## Rules
-
-- See `.claude/rules/exploration-folder-protocol.md` for the full protocol
-- See `.claude/rules/exploration-fast-track.md` for the lightweight workflow
-
-## Structure
-
-```
-explorations/
-├── [active-project]/       # Work in progress
-│   ├── README.md           # Goal, hypotheses, status
-│   ├── R/                  # Experimental code
-│   ├── scripts/            # Test scripts
-│   └── output/             # Results
-└── ARCHIVE/                # Completed or abandoned
-    ├── completed_[name]/   # Graduated to production
-    └── abandoned_[name]/   # Documented why stopped
-```
+初期允许跨领域发散；进入主稿时说明它支持或挑战哪个主张，核对数据/代码/识别证据，并让研究者掌握方向。没有“分数毕业”；零结果和反证保留。已结束的探索可放 `ARCHIVE/` 并使用 `../templates/archive-readme.md`，不删除有价值的历史。

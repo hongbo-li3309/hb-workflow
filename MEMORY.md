@@ -1,86 +1,17 @@
-# Project Memory
+# Workflow memory
 
-Corrections and learned facts that persist across sessions.
-When a mistake is corrected, append a `[LEARN:category]` entry below.
+只记录有证据、适用范围明确的工作流经验。用户最新说明优先；研究事实、假说和决定放在具体项目材料，不由记忆自动升级。
 
----
+## 当前约定（2026-09-13，用户批准的重构）
 
-<!-- Append new entries below. Most recent at bottom. -->
+- 原目录保持Claude命名和位置，GPT/Codex独立版放 `gpt-workflow/`。
+- Hongbo要求研究搭档、前沿与创新、清楚的主线、分体例写作、简洁代码和博士阶段学习。已有授权内连续执行，不反复请求普通步骤确认。
+- Stata为默认，方法和实际可用实现决定是否用Python/R/Julia等。环境能力与研究判断分别说明。
+- 当前状态 `research/PROJECT_BRIEF.md`；重要证据/决定按需建账。AI建议不等于用户决定。
+- 验证状态来自实际证据；不使用模型自评分控制提交。没有运行记NOT_RUN，输入变化标STALE。
+- 新项目通过 `scripts/new_project.py` 从当前库模板建立，不clone后删除.git；不覆盖已有目标、不默认发布远端。
+- 本次之前关于固定分数、全量worker–critic、重复日志、重做spec审批和上游作者背景的记忆已失效。历史保存在Git中，不再指导新任务。
 
-## Workflow Patterns
+## 后续学习条目
 
-[LEARN:workflow] Requirements specification phase catches ambiguity before planning → reduces rework 30-50%. Use spec-then-plan for complex/ambiguous tasks (>1 hour or >3 files).
-
-[LEARN:workflow] Spec-then-plan protocol: AskUserQuestion (3-5 questions) → create `quality_reports/specs/YYYY-MM-DD_description.md` with MUST/SHOULD/MAY requirements → declare clarity status (CLEAR/ASSUMED/BLOCKED) → get approval → then draft plan.
-
-[LEARN:workflow] Context survival before compression: (1) Update MEMORY.md with [LEARN] entries, (2) Ensure session log current (last 10 min), (3) Active plan saved to disk, (4) Open questions documented. The pre-compact hook displays checklist.
-
-[LEARN:workflow] Plans, specs, and session logs must live on disk (not just in conversation) to survive compression and session boundaries. Quality reports only at merge time.
-
-## Documentation Standards
-
-[LEARN:documentation] When adding new features, update BOTH README and guide immediately to prevent documentation drift. Stale docs break user trust.
-
-[LEARN:documentation] Always document new templates in README's "What's Included" section with purpose description. Template inventory must be complete and accurate.
-
-[LEARN:documentation] Guide must be generic (framework-oriented) not prescriptive. Provide templates with examples for multiple workflows (LaTeX, R, Python, Jupyter), let users customize. No "thou shalt" rules.
-
-[LEARN:documentation] Date fields in frontmatter and README must reflect latest significant changes. Users check dates to assess currency.
-
-## Design Philosophy
-
-[LEARN:design] Framework-oriented > Prescriptive rules. Constitutional governance works as a TEMPLATE with examples users customize to their domain. Same for requirements specs.
-
-[LEARN:design] Quality standard for guide additions: useful + pedagogically strong + drives usage + leaves great impression + improves upon starting fresh + no redundancy + not slow. All 7 criteria must hold.
-
-[LEARN:design] Generic means working for any academic workflow: pure LaTeX (no Quarto), pure R (no LaTeX), Python/Jupyter, any domain (not just econometrics). Test recommendations across use cases.
-
-## File Organization
-
-[LEARN:files] Specifications go in `quality_reports/specs/YYYY-MM-DD_description.md`, not scattered in root or other directories. Maintains structure.
-
-[LEARN:files] Templates belong in `templates/` directory with descriptive names. Currently have: session-log.md, quality-report.md, exploration-readme.md, archive-readme.md, requirements-spec.md, constitutional-governance.md.
-
-## Constitutional Governance
-
-[LEARN:governance] Constitutional articles distinguish immutable principles (non-negotiable for quality/reproducibility) from flexible user preferences. Keep to 3-7 articles max.
-
-[LEARN:governance] Example articles: Primary Artifact (which file is authoritative), Plan-First Threshold (when to plan), Quality Gate (minimum score), Verification Standard (what must pass), File Organization (where files live).
-
-[LEARN:governance] Amendment process: Ask user if deviating from article is "amending Article X (permanent)" or "overriding for this task (one-time exception)". Preserves institutional memory.
-
-## Skill Creation
-
-[LEARN:skills] Effective skill descriptions use trigger phrases users actually say: "check citations", "format results", "validate protocol" → Claude knows when to load skill.
-
-[LEARN:skills] Skills need 3 sections minimum: Instructions (step-by-step), Examples (concrete scenarios), Troubleshooting (common errors) → users can debug independently.
-
-[LEARN:skills] Domain-specific examples beat generic ones: citation checker (psychology), protocol validator (biology), regression formatter (economics) → shows adaptability.
-
-## Memory System
-
-[LEARN:memory] Two-tier memory solves template vs working project tension: MEMORY.md (generic patterns, committed), personal-memory.md (machine-specific, gitignored) → cross-machine sync + local privacy.
-
-[LEARN:memory] Post-merge hooks prompt reflection, don't auto-append → user maintains control while building habit.
-
-## Meta-Governance
-
-[LEARN:meta] Repository dual nature requires explicit governance: what's generic (commit) vs specific (gitignore) → prevents template pollution.
-
-[LEARN:meta] Dogfooding principles must be enforced: plan-first, spec-then-plan, quality gates, session logs → we follow our own guide.
-
-[LEARN:meta] Template development work (building infrastructure, docs) doesn't create session logs in quality_reports/ → those are for user work (slides, analysis), not meta-work. Keeps template clean for users who fork.
-
----
-
-## Future TODO — clo-author fork housekeeping (added 2026-05-04)
-
-These items were raised during the 2026-05-04 Stata-default adaptation of the fork. Item 1 from that plan's Open Questions list (stata-mcp connector name) is resolved (`mcp__stata-mcp__*`, hyphenated) and was therefore not carried over. The remaining four are persisted here so they don't dissolve into a session log.
-
-1. **MATLAB integration.** `CLAUDE.md` currently mentions MATLAB as a known structural-estimation tool but no agent, skill, or permission work has been done. When the first structural project lands that needs MATLAB, add: (a) `Bash(matlab -batch *)` in settings.json, (b) a `coding-standards-matlab.md` reference, (c) language entry in coder.md / coder-critic.md / verifier.md / analyze/SKILL.md routing tables.
-
-2. **R retention discipline.** The 2026-05-04 adaptation kept R coding-standards reference and the R-shaped sections in coder.md / coder-critic.md / content-standards.md intact. Watch for drift: when adding new content, do not force a parallel R example unless an active R project warrants it. The fork is Stata-default, not Stata-only.
-
-3. **data-engineer.md deep refactor (deferred).** The 2026-05-04 edit added only a language-aware figure-toolkit block-quote note at the top of §2; the package table at lines ~95–100 and the "Custom ggplot2 theme" section below it are still 100% R-flavored. When the first project actually needs Stata or Python figures end-to-end, replace the package table with a language-branched version and add Stata `grstyle`/`schemepack` style guidance.
-
-4. **settings.json housekeeping.** Two cosmetic issues were left untouched on 2026-05-04: (a) stale allow entries from a prior session (`Bash(do if:*)`, `Bash(then echo:*)`, `Bash(fi)`, the literal `find ~/Desktop -iname *ABDC*`, `Edit(/.claude/skills/review/**)` with leading slash that won't match); (b) `additionalDirectories` references `/Users/hsantanna/repos/clo-author/...` (upstream maintainer's home, not mine). Clean up only after confirming the hooks don't depend on these paths.
+新增条目写：日期、事实或用户原意、适用任务、证据/原因。不要写未经校验的改善百分比或永久有效的版本事实。

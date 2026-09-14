@@ -3,31 +3,32 @@ project:
   output-dir: ../docs
 
 website:
-  title: "The Clo-Author"
+  title: "Hongbo 的经济学研究工作流"
   navbar:
     left:
-      - text: "Quick Start"
+      - text: "开始使用"
         href: index.qmd
-      - text: "User Guide"
+      - text: "日常研究"
         href: user-guide.qmd
       - text: "Agents"
         href: agents.qmd
-      - text: "Architecture"
+      - text: "架构与验证"
         href: architecture.qmd
-      - text: "Customization"
+      - text: "项目定制"
         href: customization.qmd
-      - text: "Reference"
+      - text: "命令参考"
         href: reference.qmd
-      - text: "What's New"
+      - text: "更新记录"
         href: changelog.qmd
     right:
       - icon: github
-        href: https://github.com/hugosantanna/clo-author
+        href: https://github.com/hbli3309-web/hb-workflow
   page-footer:
-    center: "Built with [Quarto](https://quarto.org)"
+    center: "Hongbo Li · 基于 clo-author 与 Pedro Sant’Anna 工作流改造 · [Quarto](https://quarto.org)"
 
 format:
   html:
+    lang: zh
     theme:
       - darkly
       - custom.scss

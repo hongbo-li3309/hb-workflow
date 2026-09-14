@@ -1,14 +1,7 @@
-# Abandoned: [Project Name] ([DATE RANGE])
+# 暂存或结束的探索 — [问题]
 
-## Why Abandoned
-[1-2 sentence explanation]
-
-## What Was Tried
-- [Approach 1]
-- [Approach 2]
-
-## Learnings
-- [LEARN:category] What you learned for future reference
-
-## Would Revisiting Require
-- [What would need to be true to try this again?]
+- 日期/状态：[内容]
+- 尝试了什么及结果：[证据链接，保留反证]
+- 为什么停止或转向：[信息价值、数据限制或研究判断]
+- 可以复用什么：[代码、方法或学习]
+- 什么会使它值得重开：[具体条件]

@@ -1,124 +1,46 @@
 ---
 name: talk
-description: Create and audit presentations (Beamer or Quarto RevealJS). Combines talk creation, visual audit, and compilation. Replaces /create-talk, /visual-audit, /compile-latex (for talks).
-argument-hint: "[mode: create | audit | compile] [format: job-market | seminar | short | lightning] [--quarto] [file path]"
-allowed-tools: Read,Grep,Glob,Write,Edit,Task,Bash
+description: Create, audit, or compile economics presentations in Beamer or Quarto RevealJS, matching audience and time while preserving evidence and uncertainty.
+argument-hint: "[create | audit | compile] [job-market | seminar | short | lightning] [--quarto] [file] [--lang zh|en]"
+allowed-tools: Read,Grep,Glob,Write,Edit,Agent,Bash
 ---
 
 # Talk
 
-Create, audit, or compile presentations (Beamer or Quarto RevealJS).
+保留现有三种模式、四类场合及 Beamer／Quarto 支持。已有幻灯主稿或指定格式优先；新稿默认 Beamer。报告语言、听众和时长可从任务推断，只有实际缺失且影响交付时才澄清。
 
-**Input:** `$ARGUMENTS` — mode and format/path.
+## Create
 
----
+读取主稿、`research/PROJECT_BRIEF.md` 和涉及结果的 `research/EVIDENCE_LEDGER.md` 及真实图表。研究尚早也可做 idea talk，明确假说、拟设计和未完成证据；不得把计划包装成发现。稿件与输出有冲突时先标出，不把旧主稿当作数值真值。
 
-## Modes
+| 场合 | 组织重点 |
+|---|---|
+| `job-market` | 核心贡献、经济理解和证据可信度；预留讨论，技术细节有可到达的 backup |
+| `seminar` | 让听众理解问题、机制和关键判别证据；围绕主线组织讨论 |
+| `short` | 集中一个问题及最有信息的结果或命题，简要说明其成立条件 |
+| `lightning` | 听众能复述问题、核心洞见及下一步；不把未做的研究讲成结果 |
 
-### `/talk create [format]` — Create Beamer Talk
-### `/talk create [format] --quarto` — Create Quarto RevealJS Talk
+上述不是强制页数或时长。按实际演讲时间、预期提问和复杂图表安排内容，必要时估算讲述时间，标明尚未排练。
 
-Generate a presentation from the paper.
+通过 `Agent` 按需委派 `storyteller`。每页有清楚的中心问题或判断；具体数字、方向和限制可追溯到证据。表格能帮助判断时可以放正文，不机械地全部藏到 backup。新证据尚未写入论文时可以使用，但标明其状态和来源，并记录与主稿待同步事项。
 
-**Agents:** Storyteller (creator) → storyteller-critic (reviewer)
+沿用项目主题、引用及输出路径。新稿无约定时，Beamer 用 `paper/talks/<format>_talk.tex`，Quarto 用 `paper/quarto/<format>_talk.qmd`。大改按 `.claude/rules/revision.md` 另存并提供差异。speaker notes 可存讲解、限定和预期问题；核心条件不能只藏在备注中。
 
-#### Format Constraints
+## Compile 与 Audit
 
-| Format | Slides | Duration | Content Scope |
-|--------|--------|----------|---------------|
-| job-market | 40-50 | 45-60 min | Full story, all results, mechanism, robustness |
-| seminar | 25-35 | 30-45 min | Motivation, main result, 2 robustness, conclusion |
-| short | 10-15 | 15 min | Question, method, key result, implication |
-| lightning | 3-5 | 5 min | Hook, one result, so-what |
+使用项目现有构建设置；无设置时先确认可用引擎与中文字体，再选择命令。例如在文件所在目录运行：
 
-#### Workflow
-
-**Step 1: Parse Arguments**
-
-- **Format** (required): `job-market` | `seminar` | `short` | `lightning`
-- **Paper path** (optional): defaults to `paper/main.tex`
-- **Engine**: Beamer (default) or Quarto RevealJS (`--quarto`)
-- If no format specified, ask the user.
-
-**Step 2: Dispatch Storyteller**
-
-Read the paper and extract: research question, identification strategy, main result, secondary results, robustness checks, key figures/tables, institutional background. Design narrative arc for the chosen format. Build the slide file with shared preamble if available.
-
-The Storyteller follows these design principles:
-- **One idea per slide** — never cram two concepts onto one frame
-- **Figures over tables; tables in backup** — audiences absorb figures instantly; regression tables belong in backup slides where referees can inspect them during Q&A
-- **Build tension** — motivation → question → method → findings → implications
-- **Transition slides between major sections** — signal where the talk is going
-- **All claims must appear in the paper** — the paper is the single source of truth; never add results or claims that are not in the manuscript
-
-Compile with XeLaTeX (Beamer) or `quarto render` (Quarto).
-
-Save to `paper/talks/[format]_talk.tex` (Beamer) or `paper/quarto/[format]_talk.qmd` (Quarto).
-
-**Step 3: Dispatch Storyteller-Critic**
-
-After the Storyteller returns, dispatch the storyteller-critic to review across 5 categories:
-
-| Category | What It Checks |
-|----------|---------------|
-| **Narrative flow** | Does the story build properly? Is there a clear arc from motivation through results to implications? Are transitions smooth? |
-| **Visual quality** | Text overflow, font readability (>= 10pt), figure sizing, consistent formatting, overfull hbox warnings |
-| **Content fidelity** | Every claim traceable to the paper — no orphan results, no unsupported statements |
-| **Scope for format** | Right amount of content for the duration — not cramming a seminar into a lightning talk, not padding a short talk to seminar length |
-| **Compilation** | Does it compile cleanly without errors or warnings? |
-
-Score as advisory (non-blocking). Save report to `quality_reports/[format]_talk_review.md`.
-
-**Step 4: Fix Critical Issues**
-
-If the storyteller-critic finds Critical issues (compilation failures, content not in paper):
-1. Re-dispatch Storyteller with specific fixes (max 3 rounds per three-strikes rule)
-2. Re-run storyteller-critic to verify
-
-**Step 5: Present Results**
-
-Report to the user:
-1. Generated file path
-2. Slide count and format compliance
-3. Storyteller-critic score (advisory, non-blocking)
-4. TODO items (missing figures, tables not yet generated)
-
----
-
-### `/talk audit [file]` — Visual Audit
-
-Check existing slides for layout issues.
-
-Run visual quality checks:
-- Text overflow on any slide
-- Font sizes (>= 10pt for projection)
-- Table readability
-- Figure sizing and labels
-- Consistent formatting
-- Overfull hbox warnings
-
----
-
-### `/talk compile [file]` — Compile Talk
-
-Automated compilation via latexmk:
 ```bash
-cd paper/talks && latexmk [file]
+latexmk -pdf -interaction=nonstopmode -halt-on-error seminar_talk.tex
+quarto render seminar_talk.qmd
 ```
 
-For Quarto:
-```bash
-cd paper/quarto && quarto render [file]
-```
+命令只用于对应格式，中文 Beamer 可按已配置引擎使用 `-xelatex` 或 `-lualatex`。保留实际退出码和完整日志；不能用 `| tail` 的成功掩盖编译失败。工具缺失为 `NOT_RUN`，不要擅自声称已生成 PDF。
 
----
+`audit` 先分清能否查看渲染结果。有 PDF／截图或浏览器预览时检查真实页面；只有源文件时仅做静态审查并标记视觉检查 `NOT_RUN`。检查溢出、投影可读性、图例与轴、颜色／灰度、叠层与导航，以及数字和口径；编译成功不代表版面可读。
 
-## Principles
+大幅新建、重要演讲或用户要求审查时委派 `storyteller-critic` 独立评议。critic 不改稿；由 creator 修正证实的问题，再验证受影响部分。不为每个小改动机械调用完整审查链。
 
-- **Paper is authoritative.** Every claim must appear in the paper.
-- **Figures over tables.** Audiences absorb figures instantly. Put regression tables in backup slides for Q&A.
-- **Less is more.** Especially for short and lightning formats — ruthlessly cut.
-- **One idea per slide.** If you need a second point, make a second slide.
-- **Audience calibration.** Job market = demonstrate rigor and command of the literature. Seminar = sell the interesting result. Short = method and key finding. Lightning = sell the idea in one breath.
-- **Advisory scoring.** Talk scores don't block commits.
-- **Worker-critic pairing.** Storyteller creates, storyteller-critic critiques. Never skip the review.
+## 交付
+
+提供源文件、实际生成的 PDF／HTML、页数与用途、编译和视觉检查的 `PASS / FAIL / NOT_RUN / NOT_APPLICABLE`、未解决内容。审查报告保存 `quality_reports/reviews/YYYY-MM-DD_<task>.md`；需要后缀时追加，保留历史。`STALE` 的旧结果不得当作当前已核验证据。

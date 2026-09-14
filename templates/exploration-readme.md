@@ -1,20 +1,12 @@
-# [Project Name]
+# 探索 — [问题]
 
-## Goal
-[1-2 sentence description]
+- 状态：[进行中/暂存/已完成/停止]；更新：[日期]
+- 经济问题与当前主线关系：[内容]
+- 竞争解释：[内容]
+- 判别性预测与最小检验：[数据/代码/可观察结果]
+- 已知证据：[实际来源；合成例子明确标记]
+- 发现与局限：[包括零结果、相反结果和不能区分的情况]
+- 继续/停止/重开条件：[内容]
+- 值得学习的工具：[按需]
 
-## Status
-[IN PROGRESS / COMPLETED / ABANDONED] (started [DATE])
-
-## Hypotheses to Test
-1. [Hypothesis 1]
-2. [Hypothesis 2]
-
-## Success Criteria
-- [Something you can measure]
-
-## Findings
-(Updated as work progresses)
-
-## Timeline
-- [DATE]: Started exploration
+不能为达到预期符号或显著性不断改规格。纳入主稿需要证据、适用检查与研究者认可其主线作用。

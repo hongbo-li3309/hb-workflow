@@ -1,208 +1,60 @@
-# Coding Standards: Python
+# Python: short scripts a researcher can inspect
 
-These standards apply to all Python code produced by the Coder agent. Derived from C++ Core Guidelines engineering discipline, adapted for Python in empirical economics. The coder-critic enforces these rules.
+Use the existing environment and paths. A small analysis can remain one script with helper functions; extract modules when reuse or distinct stages justify it. Put consequential research settings near the top. Explain sample choices, identification and units; do not narrate every line.
 
----
+## Minimal descriptive example
 
-## 1. Runtime and Dependencies
+Save as `scripts/python/describe.py`; run from any directory. The input is a project CSV with `group` and `wage` fields. This computes group means, not a causal effect. Synthetic test data must be labeled as fixtures.
 
-- **Python >= 3.11** (`tomllib`, improved error messages, `ExceptionGroup`)
-- **`conda`** (preferred) or **`venv`** for environments
-- `environment.yml` or `requirements.txt` committed, versions pinned
-- No `pip install` inside scripts
+~~~python
+from pathlib import Path
+import csv
+import json
+import math
 
-### Core Stack
+ROOT = Path(__file__).resolve().parents[2]
+INPUT = ROOT / "data/cleaned/sample.csv"
+OUTPUT = ROOT / "paper/tables/group_means.json"
+groups = {}
 
-| Package | Purpose |
-|---------|---------|
-| `numpy` | Array operations, linear algebra |
-| `scipy` | Statistical distributions, optimization |
-| `pandas` | Panel data manipulation |
-| `matplotlib` | All figures |
-| `joblib` | Parallel bootstrap/simulation |
-| `statsmodels` | Auxiliary regression tools |
-| `linearmodels` | Panel models, IV, fixed effects |
+with INPUT.open(newline="") as handle:
+    for row in csv.DictReader(handle):
+        value = float(row["wage"])
+        if not math.isfinite(value):
+            raise ValueError("wage must be finite; define missing-data handling explicitly")
+        groups.setdefault(row["group"], []).append(value)
 
-### Prohibited
+if not groups:
+    raise ValueError("Empty analysis sample")
+summary = {group: {"n": len(values), "mean_wage": sum(values) / len(values)}
+           for group, values in sorted(groups.items())}
+OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+OUTPUT.write_text(json.dumps(summary, indent=2) + "\n")
+~~~
 
-| Package | Reason | Replacement |
-|---------|--------|-------------|
-| `sklearn` for inference | Not designed for causal inference | Custom or `statsmodels` |
-| `plotly` / `seaborn` for paper figures | PDF output issues, non-standard for econ | `matplotlib` |
+When stochastic work is needed, keep and use the RNG object:
 
----
-
-## 2. Naming Conventions
-
-| Element | Convention | Example |
-|---------|-----------|---------|
-| Files / modules | `snake_case.py` | `estimation.py` |
-| Functions | `snake_case` | `estimate_att()` |
-| Variables | `snake_case` | `n_obs`, `y_grid` |
-| Constants | `UPPER_SNAKE_CASE` | `N_BOOT`, `ALPHA` |
-| Classes | `PascalCase` | `EstimationResult` |
-| Type aliases | `PascalCase` | `LinkFunction` |
-| Booleans | `is_`, `has_` prefix | `is_treated`, `has_converged` |
-| Private helpers | `_leading_underscore` | `_validate_index()` |
-
----
-
-## 3. Code Style
-
-- **Formatter:** `black` (mandatory, run before commit)
-- **Linter:** `ruff` (mandatory, zero warnings)
-- **Import order:** `isort` (stdlib → third-party → local)
-- **Line width:** 88 characters (Black default)
-- **Docstrings:** NumPy style
-- **Type hints:** required on all function signatures
-
-```python
-from typing import Callable
+~~~python
 import numpy as np
-from numpy.typing import NDArray
+SEED = 42
+rng = np.random.default_rng(SEED)
+draws = rng.normal(size=100)
+~~~
 
-FloatArray = NDArray[np.float64]
-LinkFunction = Callable[[FloatArray], FloatArray]
+Discarding `np.random.default_rng(SEED)` does not seed later global NumPy draws. For parallel simulation, allocate explicit independent streams; record software and RNG settings. Package-specific estimators may require their own random-state argument.
 
-def estimate_att(
-    data: pd.DataFrame,
-    g: int,
-    t: int,
-    *,
-    weights: FloatArray | None = None,
-) -> dict[str, FloatArray | int]:
-    ...
-```
+## Data, estimation and outputs
 
----
+Use pandas/polars when they simplify the task; do not add them to a trivial standard-library script. Validate key uniqueness and intended merge cardinality. Check missingness, attrition, time ordering and units. Preserve raw inputs and use a new object for a temporary subgroup.
 
-## 4. Numerical Discipline
+Choose estimator and covariance settings for the design. Record package versions actually used and verify unfamiliar APIs against official docs. A readable formula is often better than a custom framework. Distinguish fitted parameters, calibrated values, predictions and causal estimates.
 
-### NumPy Discipline
-- All numerical computation through NumPy arrays, never Python lists
-- Use `np.float64` explicitly
-- `np.sum()`, `np.min()`, `np.max()` — never Python builtins on arrays
+Fail visibly on invalid input, nonconvergence or inconsistent output. Avoid broad exceptions that continue with a previous model. Use tolerances suitable for quantity and scale; do not blindly clip invalid probabilities or require exact floating-point equality.
 
-### Float Safety
-```python
-def safe_link_inv(
-    p: FloatArray, link_inv: LinkFunction, eps: float = 1e-12
-) -> FloatArray:
-    """Apply inverse link with boundary clamping."""
-    p_clamped = np.clip(p, eps, 1.0 - eps)
-    return link_inv(p_clamped)
-```
+Persist useful outputs and expensive handoffs in documented formats; not every object. Only load trusted pickle/joblib files. Tables and plots preserve sample, units and uncertainty, with small underlying plot data saved when useful.
 
-### CDF Monotonicity
-```python
-def enforce_monotone(f: FloatArray) -> FloatArray:
-    """Enforce non-decreasing constraint on CDF values."""
-    return np.maximum.accumulate(f)
-```
+## Verification
 
-### Reproducibility
-```python
-# RIGHT: explicit RNG object
-rng = np.random.default_rng(seed=SEED)
-weights = rng.exponential(scale=1.0, size=(N, N_BOOT))
+Use `scripts/run_check.py` with code, data and configuration as explicit inputs. Changed inputs make old evidence **STALE**. Lint checks syntax/patterns without importing or executing the script; execution remains **NOT_RUN**.
 
-# WRONG: global state
-np.random.seed(42)
-weights = np.random.exponential(1.0, size=(N, N_BOOT))
-```
-
-### Pre-allocation
-```python
-# RIGHT
-boot_results = np.empty((n_grid, N_BOOT), dtype=np.float64)
-for b in range(N_BOOT):
-    boot_results[:, b] = estimate_weighted(...)
-
-# WRONG: growing a list
-results = []
-for b in range(N_BOOT):
-    results.append(estimate_weighted(...))
-```
-
----
-
-## 5. Function Design
-
-### Consistent API
-```python
-def estimate_att(
-    data: pd.DataFrame,
-    g: int,
-    t: int,
-    *,
-    link_fn: LinkFunction = scipy.stats.norm.cdf,
-    link_inv: LinkFunction = scipy.stats.norm.ppf,
-    y_grid: FloatArray,
-    weights: FloatArray | None = None,
-) -> dict[str, FloatArray | int]:
-    """Estimate ATT for group g at time t.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        Panel data with columns: unit_id, group, time, outcome.
-    ...
-
-    Returns
-    -------
-    dict
-        Keys: 'estimate', 'se', 'n_obs'.
-    """
-```
-
-### Fail Fast
-```python
-def ecdf_panel(data: pd.DataFrame, g: int, t: int, y_grid: FloatArray) -> FloatArray:
-    mask = (data["group"] == g) & (data["time"] == t)
-    outcomes = data.loc[mask, "outcome"].to_numpy()
-    if len(outcomes) == 0:
-        raise ValueError(f"No observations for group {g}, time {t}")
-    return np.array([np.mean(outcomes <= y) for y in y_grid])
-```
-
----
-
-## 6. Parallelism
-
-```python
-from joblib import Parallel, delayed
-
-results = Parallel(n_jobs=-1)(
-    delayed(estimate_weighted)(data, weights=boot_weights[:, b], ...)
-    for b in range(N_BOOT)
-)
-```
-
-Pass `rng` objects or pre-generated seeds — never rely on global state for parallel work.
-
----
-
-## 7. Error Handling
-
-- Raise `ValueError` for bad inputs, `RuntimeError` for computation failures
-- Never return `None` silently on failure
-- Check for `np.nan` / `np.inf` after numerical operations:
-```python
-if np.any(np.isnan(estimates)) or np.any(np.isinf(estimates)):
-    raise RuntimeError(f"NaN/Inf in estimates for group {g}, time {t}")
-```
-
----
-
-## 8. Prohibited Patterns
-
-| Pattern | Reason | Replacement |
-|---------|--------|-------------|
-| `os.chdir()` | Breaks portability | `pathlib.Path` relative to project root |
-| Hardcoded paths | Breaks portability | `pathlib.Path` or config module |
-| `from module import *` | Namespace pollution | Explicit imports |
-| Python `sum/min/max` on arrays | Slow, wrong semantics | `np.sum`, `np.min`, `np.max` |
-| `np.random.seed()` global state | Not thread-safe, not parallel-safe | `np.random.default_rng(seed)` |
-| Growing lists in loops | O(n²) for large n | Pre-allocate `np.empty()` |
-| `except:` bare | Swallows all errors | `except SpecificError:` |
-| Mutable default arguments | Shared state bug | `None` default + create inside |
+Test meaningful boundaries or a known small answer when correctness is at risk. The descriptive example is exercised with known group means, bad values and empty samples in `tests/test_analysis_examples.py`; this does not validate an empirical estimator. Record **PASS / FAIL / NOT_RUN / NOT_APPLICABLE** and actual logs in `quality_reports/reviews/YYYY-MM-DD_<task>.md`.

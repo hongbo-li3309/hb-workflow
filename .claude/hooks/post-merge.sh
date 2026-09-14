@@ -1,9 +1,3 @@
-#!/bin/bash
-# Post-merge hook: Remind to update SESSION_REPORT.md
-
-echo "=== SESSION MERGED TO MAIN ==="
-echo ""
-echo "Remember to append a summary to SESSION_REPORT.md if you haven't already."
-echo ""
-
-exit 0
+#!/usr/bin/env bash
+# Optional Git hook; not installed automatically.
+printf '%s\n' 'Merge complete. Recheck affected evidence and update research/PROJECT_BRIEF.md only if the research state changed.'

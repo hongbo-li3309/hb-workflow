@@ -1,56 +1,12 @@
-# Requirements Specification: [Title]
+# 任务说明 — [题目]
 
-**Date:** [YYYY-MM-DD]
-**Status:** DRAFT | APPROVED
+仅当复杂任务的范围确实不清楚时使用，用户已给充分要求或已批准计划则不要再开一轮审批。
 
----
-
-## Objective
-
-[One sentence: what success looks like]
-
----
-
-## Requirements
-
-### MUST Have (Non-Negotiable)
-
-- [ ] [Required feature or constraint]
-- [ ] [Required feature or constraint]
-
-### SHOULD Have (Preferred)
-
-- [ ] [Preferred feature or enhancement]
-- [ ] [Preferred feature or enhancement]
-
-### MAY Have (Optional, If Time)
-
-- [ ] [Nice-to-have enhancement]
-- [ ] [Nice-to-have enhancement]
-
----
-
-## Clarity Status
-
-| Aspect | Status | Notes |
-|--------|--------|-------|
-| [Ambiguous aspect] | CLEAR / ASSUMED / BLOCKED | [How it was resolved or why it's assumed] |
-| [Another aspect] | CLEAR / ASSUMED / BLOCKED | [Explanation] |
-
-**Status Definitions:**
-- **CLEAR:** Fully specified, no ambiguity
-- **ASSUMED:** Reasonable assumption made in absence of clarity; user can override
-- **BLOCKED:** Cannot proceed until this is answered
-
----
-
-## Success Criteria
-
-- [Measurable criterion for completion]
-- [Measurable criterion for completion]
-
----
-
-## Approval
-
-[ ] User approved: [Date]
+- 目的：[具体结果和使用者]
+- 必须完成：[产物、内容质量、格式与保护的既有内容]
+- 已明确：[用户给定条件]
+- 合理假设：[缺省选择及理由，允许用户调整]
+- 必须澄清：[确实阻碍工作的事实；无则写无]
+- 范围外：[会扩张任务的工作]
+- 验收：[能观察或运行的检查，主观判断单独说明]
+- 授权：[用户已确认的范围与时间；DRAFT/APPROVED]

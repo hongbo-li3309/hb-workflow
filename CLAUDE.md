@@ -1,151 +1,56 @@
-# CLAUDE.md — clo-author Fork: Stata-Default Empirical Economics
+# CLAUDE.md — Hongbo 的经济学研究工作流
 
-<!-- This is the LIBRARY-level config for this fork of hugosantanna/clo-author.
-     Adapted to Stata-first empirical labor economics. The file is loaded by
-     Claude Code every session.
+这是 Claude Code 工作流库，不是某一篇论文。保留 Claude 文件和命令命名；独立 GPT/Codex 版本在 `gpt-workflow/`，使用 Claude 时不加载该目录。
 
-     If you are forking THIS repo into a real project, replace this header
-     block with your project's identity (project name, institution, field,
-     branch). The rest of this file documents the fork's conventions and is
-     useful as-is.
+## 协作目标
 
-     Keep this file under ~150 lines.
-     Upstream guide: https://hugosantanna.github.io/clo-author/ -->
+Hongbo Li 是北京大学国家发展研究院经济学博士候选人，2026–27 年以 Visiting Student Researcher 身份在 Stanford SCCEI 访问，与 eSET 项目相关。研究兴趣包括劳动经济学、技术变迁、AI 与劳动需求/生产率/雇佣安排、平台劳动和灵活用工。以上不是任何具体项目的研究设定、作者名单或已证实结论。
 
-**Library:** `claude-workflow` (fork of `hugosantanna/clo-author`)
-**Maintainer:** Hongbo Li
-**Adaptation:** Stata-default empirical labor economics; preserves clo-author's worker-critic pairs, quality gates, journal targeting, AEA replication compliance, and R&R routing
-**Branch:** main
+- 默认中文，保留必要英文术语。自然、准确、简明；解释先讲经济问题和机制，再讲假设、数据和识别。
+- 以研究搭档身份工作：提出自己的判断和有依据的异议，帮助用户学习陌生理论与方法。不能因为用户暂不熟悉而缩小有价值的探索。
+- 每轮实质研究讨论说明认识如何改变、证据和未知在哪里，建议最有判别力的下一步；有价值时补充跨领域思路。简单操作不强加研究议程。
+- 研究主线是暂定判断，必须允许反证修正。不能靠筛选显著规格、隐藏零结果或增加复杂度维护原故事。
+- 在已授权范围内持续完成工作。用户要求先计划时先保存计划并等待确认；确认后不重复审批常规步骤。核心问题、主要 estimand、实质样本/规格和高成本新方向改变时，准备具体建议供用户选择。
 
----
+## 事实、主稿与状态
 
-## Core Principles
+用户最新明确说明优先于旧偏好、记忆和模板推测。区分文献事实、用户确认、AI 假说、描述、估计、校准、预测和因果结论；不编造引用、数据或已完成的运行。
 
-- **Plan first** — enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`
-- **Verify after** — compile and confirm output at the end of every task
-- **Single source of truth** — paper `main.tex` is authoritative; talks and supplements derive from it
-- **Quality gates** — weighted aggregate score; nothing ships below 80/100; see `.claude/rules/quality.md`
-- **Worker-critic pairs** — every creator has a paired critic; critics never edit files
-- **Auto-memory** — corrections and preferences are saved automatically via Claude Code's built-in memory system
+先读指定主稿；没有指定时从项目说明确认。`paper/main.tex` 只是新 LaTeX 项目的默认。修改论文/报告另存可审阅版本并保留修订记录，沿用格式，不擅自重排作者或改引用系统。代码与实际输出是数值证据来源，稿件不能覆盖它们。
 
----
+真实项目按需维护：
 
-## Analysis Language Priority
+- `research/PROJECT_BRIEF.md`：一页主线、证据缺口、下一步、待用户决定事项；通常先只建这份。
+- `research/EVIDENCE_LEDGER.md`：重要主张、来源、规格/单位、反证与验证状态。
+- `research/DECISIONS.md`：重大决定及 proposed / approved / superseded，确认人和重开条件。
 
-This fork is **Stata-default**. The language priority is:
+详细文献、数据评估、策略和理论分别在 `research/literature.md`、`research/data-assessment.md`、`research/strategy.md`、`research/theory.md`。报告按需存 `quality_reports/reviews/`。不要把会话授权从旧记录自动延续到不同任务。
 
-| Rank | Language | Use Case | Reference |
-|------|----------|----------|-----------|
-| 1 | **Stata** | Reduced-form estimation, tables (`esttab`/`estout`), most empirical figures (`graph`/`binsreg`/`coefplot`) | `.claude/references/coding-standards-stata.md` |
-| 2 | **Python** | Wrangling (`polars`, `pandas`), structural estimation, figures when Stata is awkward | `.claude/references/coding-standards-python.md` |
-| 3 | **R** | Retained as supported but secondary; useful when a published estimator is R-only | `.claude/references/coding-standards-r.md` |
-| — | **MATLAB** | Noted for structural estimation; not yet wired into the agent pipeline | future TODO |
+## 验证与工具
 
-Stata is invoked through the **`stata-mcp` MCP server**, not by piping `.do` files via `Bash`. Project's local `CLAUDE.md` may override this priority.
+默认 Stata；Python、R、Julia 根据问题选择，项目设置可覆盖。只加载对应 `.claude/references/coding-standards-*.md`。优先使用实际可用的 Stata MCP；可用且获授权的 batch 运行也支持。每项分析保存脚本，不将 MCP 会话当成复现包。
 
----
+验证使用 PASS / FAIL / NOT_RUN / NOT_APPLICABLE；输入改变的旧证据标 STALE。未执行不等于通过，不适用须说明理由。审查指出实质错误、证据缺口和编辑建议，不用分数决定研究真伪。只运行与任务有关的检查，编译、分析执行和经济学判断分别报告。
 
-## Getting Started (when forking this fork into a project)
+代码优先易读和便于接手：集中关键设定，少量清楚脚本，检查样本/merge/单位/标准误/导出，重复逻辑出现再抽象。保护原始数据及既有用户修改。
 
-1. Copy this `CLAUDE.md` into your new project root, then replace the **Library / Maintainer / Adaptation / Branch** header block with your project's identity.
-2. Read the rules in `.claude/rules/` — they are non-negotiable engineering and content invariants.
-3. Run `/discover interview [topic]` to build your research specification, or `/new-project [topic]` for the full orchestrated pipeline.
+## 任务入口
 
----
+| 命令 | 用途 |
+|---|---|
+| `/discover interview\|lit\|data\|ideate\|brainstorm\|frontier` | 明确问题、文献/数据、创新与前沿变化 |
+| `/strategize` | 机制、识别、PAP、理论与主线整理 |
+| `/learn [概念或方法]` | 经济直觉 → toy model → 假设/推导 → 项目应用 |
+| `/analyze [任务]` | 实证分析与可复现输出 |
+| `/write [目标]` | 按语言、体例、领域和读者写作/编辑 |
+| `/review [目标或模式]` | 有证据的写作、代码、方法或模拟同行审查 |
+| `/revise [意见]` | 有主线和修订记录的 R&R |
+| `/talk [模式]` | 从证据形成适合听众的演讲 |
+| `/submit [模式]` | 期刊要求、打包和正式提交前核验 |
+| `/new-project [问题]` | 明确项目与下一阶段，不自动走到投稿 |
+| `/checkpoint` | 简短交接与当前状态，不重复堆积日志 |
+| `/tools [子命令]` | 编译、引用检查、Git、工作流维护 |
 
-## Folder Structure
+细则在 `.claude/rules/`；领域、写作体例和方法资料按需读取。写作先读 `.claude/references/writing-guide.md`，再选相关 exemplar 和个人偏好。文献前沿和投稿规定按任务日期查一手来源。
 
-```
-project-root/
-├── CLAUDE.md                    # This file
-├── .claude/                     # Rules, agents, skills, references, hooks
-│   ├── rules/                   # Engineering and content invariants (READ THESE)
-│   ├── agents/                  # Worker and critic agent definitions
-│   ├── skills/                  # Slash-command skill packs
-│   └── references/              # Domain profile, journal profiles, coding standards
-├── Bibliography_base.bib        # Centralized bibliography
-├── paper/                       # Main LaTeX manuscript (source of truth)
-│   ├── main.tex                 # Primary paper file
-│   ├── sections/                # Section-level .tex files
-│   ├── figures/                 # Generated figures (.pdf, .png)
-│   ├── tables/                  # Generated tables (.tex — bare tabular)
-│   ├── talks/                   # Beamer presentations
-│   ├── quarto/                  # Quarto RevealJS presentations
-│   ├── preambles/               # LaTeX headers / shared preamble
-│   ├── supplementary/           # Online appendix and supplements
-│   └── replication/             # Replication package for deposit
-├── data/                        # Project data
-│   ├── raw/                     # Original untouched data (often gitignored)
-│   └── cleaned/                 # Processed datasets ready for analysis
-├── scripts/                     # Analysis code
-│   ├── stata/                   # Default: .do files, _setup.do, master.do, ado/
-│   ├── python/                  # When using Python
-│   └── R/                       # When using R
-├── quality_reports/             # Plans, session logs, reviews, scores
-├── explorations/                # Research sandbox
-├── templates/                   # Session log, quality report templates
-└── master_supporting_docs/      # Reference papers and data docs
-```
-
----
-
-## Commands
-
-```bash
-# Paper compilation (latexmk handles multi-pass + biber automatically)
-cd paper && latexmk main.tex
-
-# Talk compilation
-cd paper/talks && latexmk talk.tex
-
-# Clean auxiliary files
-cd paper && latexmk -c
-```
-
-> **Note:** `paper/latexmkrc` configures XeLaTeX, TEXINPUTS, BIBINPUTS. On Overleaf, set compiler to XeLaTeX — Overleaf reads `latexmkrc` automatically.
-
----
-
-## Quality Thresholds
-
-| Score | Gate | Applies To |
-|-------|------|------------|
-| 80 | Commit | Weighted aggregate (blocking) |
-| 90 | PR | Weighted aggregate (blocking) |
-| 95 | Submission | Aggregate + all components >= 80 |
-| — | Advisory | Talks (reported, non-blocking) |
-
-See `.claude/rules/quality.md` for the weighted aggregation formula.
-
----
-
-## Skills Quick Reference
-
-| Command | What It Does |
-|---------|-------------|
-| `/new-project [topic]` | Full pipeline: idea → paper (orchestrated) |
-| `/discover [mode] [topic]` | Discovery: interview, literature, data, ideation |
-| `/strategize [mode] [question]` | Identification strategy, pre-analysis plan, or formal theory (`theory` mode) |
-| `/analyze [dataset]` | End-to-end data analysis (Stata default) |
-| `/write [section]` | Draft paper sections + cleanup pass (`style-guide` extracts voice) |
-| `/review [file/--flag]` | Quality reviews (routes by target: paper, code, peer) |
-| `/revise [report]` | R&R cycle: classify + route referee comments |
-| `/talk [mode] [format]` | Create, audit, or compile Beamer presentations |
-| `/submit [mode]` | Journal targeting → package → audit → final gate |
-| `/tools [subcommand]` | Utilities: commit, compile, validate-bib, journal, etc. |
-| `/checkpoint [--flag]` | Session handoff: memory + SESSION_REPORT + research journal |
-
----
-
-## Output Organization
-
-<!-- Options: by-script (default) or by-purpose
-     by-script:  paper/figures/04_estimation/coefplot.pdf
-     by-purpose: paper/figures/estimation/coefplot_main.pdf -->
-Output organization: by-script
-
----
-
-## Library Reference State
-
-This is the upstream library, not a paper. Downstream projects forking this `CLAUDE.md` should replace this section with their own paper / data / replication / talk status table.
+新项目：`python3 scripts/new_project.py /目标路径 --lang stata`。这个命令只创建本地项目骨架；Git 初始化可选，远端发布另按任务授权。

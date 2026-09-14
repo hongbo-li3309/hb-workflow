@@ -1,114 +1,22 @@
-# Agents: Pairs, Separation of Powers, and Escalation
+# Agents — 专业分工与证据整合
 
----
+Claude 版保留既有角色名。当前 Claude 工具名为 Agent（旧 Task 是兼容别名）；只使用当前会话提供的能力。分工按信息价值和独立性决定，不按固定人数或配对仪式决定。
 
-## 1. Adversarial Pairing
+| 工作 | 执行角色 | 需要独立核查时 |
+|---|---|---|
+| 文献 | librarian | librarian-critic |
+| 数据发现 | explorer | explorer-critic |
+| 数据构建/可视化 | data-engineer | coder-critic |
+| 机制与识别 | strategist | strategist-critic |
+| 理论与证明 | theorist | theorist-critic |
+| 分析代码 | coder | coder-critic + verifier（实际运行证据） |
+| 写作 | writer | writer-critic |
+| 演讲 | storyteller | storyteller-critic |
+| 模拟同行审查 | editor | domain-referee、methods-referee |
+| 协调与验证 | orchestrator、verifier | 主线程检查范围和证据 |
 
-**Every worker agent has a paired critic. The Orchestrator never dispatches a creator without scheduling its critic.**
+委派时给出当前问题、具体输入/版本、产出、允许修改的文件、已确认决定和未知事项。没有共同上下文的 agent 不能从项目名推测研究设定。独立任务可并行；互相依赖或会编辑同一文件的任务顺序执行。
 
-### Worker-Critic Pairs
+Critic 不改主稿、数据、代码或用户决定；可写自己负责的审查报告。权限与报告中声称的工作必须一致，只读检查不能称已运行。Worker 自检仍必要，重要方法或结果可请独立 critic 核验；小修直接完成并核对。
 
-| Worker (Creator) | Critic (Reviewer) | What's Reviewed |
-|-----------------|-------------------|-----------------|
-| librarian | librarian-critic | Literature coverage, gaps, recency |
-| explorer | explorer-critic | Data feasibility, quality, identification fit |
-| data-engineer | coder-critic | Data pipeline quality, reproducibility, transformation correctness |
-| strategist | strategist-critic | Identification validity, assumptions, robustness |
-| theorist | theorist-critic | Proof validity, assumption minimality, notation, citations |
-| coder | coder-critic | Code quality, reproducibility, code-strategy alignment |
-| writer | writer-critic | Manuscript polish, LaTeX quality, hedging |
-| storyteller | storyteller-critic | Talk structure, audience calibration, visual quality |
-
-### Peer Review (Special Case)
-
-Peer Review uses a different structure — the Orchestrator dispatches two independent referees:
-
-1. Orchestrator assigns the paper to domain-referee and methods-referee (blind, independent)
-2. Both referees produce scored reports
-3. Orchestrator synthesizes a decision: Accept / Minor Revisions / Major Revisions / Reject
-
-### Enforcement
-
-- The Orchestrator checks: if a creator artifact exists without a critic score, it is **not approved**
-- No artifact advances to the next phase without its critic's score >= 80
-- Critics produce scores; creators produce artifacts — never the reverse
-
----
-
-## 2. Separation of Powers
-
-**Critics never create. Creators never self-score.**
-
-### Critics Never Create
-
-A critic's job is to evaluate, not to produce artifacts. If a critic produces code, text, or data during its review, something is wrong.
-
-**What critics DO:**
-- Score artifacts against a rubric
-- List issues with severity and deductions
-- Suggest fixes (as recommendations, not implementations)
-
-**What critics DON'T DO:**
-- Write code to fix the issues they found
-- Rewrite paper sections
-- Produce alternative implementations
-
-**Why:** A critic who fixes their own findings has incentive to find only fixable issues. Separation keeps criticism honest.
-
-### Creators Can't Self-Score
-
-A creator cannot evaluate the quality of its own work. The score always comes from the paired critic.
-
-| Agent | Creates | Scored By |
-|-------|---------|-----------|
-| librarian | Annotated bibliography | librarian-critic |
-| explorer | Data assessment | explorer-critic |
-| data-engineer | Data pipeline and cleaned datasets | coder-critic |
-| strategist | Strategy memo | strategist-critic |
-| theorist | Assumptions, theorems, proofs (theory section) | theorist-critic |
-| coder | R/Python/Julia scripts | coder-critic |
-| writer | Paper manuscript | writer-critic |
-| storyteller | Beamer talk | storyteller-critic |
-
-### Enforcement
-
-The Orchestrator flags violations:
-- If a critic invocation produces a file in `scripts/`, `paper/`, or `paper/talks/` → flag
-- If a creator reports its own score → discard, dispatch critic
-
----
-
-## 3. Three Strikes Escalation
-
-**If a worker-critic pair fails to converge after 3 rounds, the Orchestrator escalates.**
-
-### The Protocol
-
-```
-Round 1: Critic reviews → Worker fixes
-Round 2: Critic reviews → Worker fixes
-Round 3: Critic reviews → Worker fixes
-         Still failing?
-              ↓
-         ESCALATION
-```
-
-### Escalation Routing
-
-| Pair | Escalation Target | What Happens |
-|------|-------------------|--------------|
-| coder + coder-critic | strategist-critic | Re-evaluates whether the strategy memo is implementable |
-| data-engineer + coder-critic | strategist-critic | Re-evaluates whether the data specification is tractable |
-| writer + writer-critic | Orchestrator | Structural rewrite, not just polish |
-| strategist + strategist-critic | User | Fundamental design question — needs human judgment |
-| theorist + theorist-critic | User | Proof-level disagreement — user adjudicates whether the result holds |
-| librarian + librarian-critic | User | Scope disagreement — user decides breadth vs depth |
-| explorer + explorer-critic | User | Data feasibility deadlock — user decides resource trade-offs |
-| storyteller + storyteller-critic | User | Talk scope/format disagreement |
-
-### Rules
-
-- **Max 3 rounds per pair per invocation** — no infinite loops
-- **Escalation is logged** in the research journal with strike count
-- **User escalation requires a clear question** — not "they disagree," but "strategist-critic requires X, which contradicts Y. Which takes priority?"
-- **Post-escalation:** The worker starts fresh from the escalation target's decision, not from its previous attempt
+主线程不盲从 critic：复核关键发现，区分错误、缺口与偏好，解释分歧及可判别证据。不因累计评分自动推进，不通过角色扮演预测期刊决策。陷入重复争论时提出具体研究选择或执行障碍，不能让用户从大量 agent 对话重建背景。

@@ -1,211 +1,82 @@
 ---
-title: "User Guide"
-subtitle: "What You Can Do with the Clo-Author"
+title: "日常研究"
+subtitle: "从一个经济问题开始，在证据与学习中推进"
 ---
 
-# How It Works
+## 先给出问题与当前判断
 
-You describe what you want in plain English. Claude handles the rest.
+说明要理解什么、已有材料在哪里、当前最大的未知是什么，不必先把任务翻译成 agent 名称。主线程在已授权范围内完成必要工作；核心问题、主要 estimand、主样本或高成本新方向改变时，准备具体建议供研究者判断。
 
-| You Do | Happens Automatically |
-|--------|----------------------|
-| Describe what you want | Claude selects and runs the right skills |
-| Approve plans | Orchestrator coordinates agents via dependency graph |
-| Review final output | Worker-critic pairs ensure quality |
-| Say "commit" when ready | Quality gates enforce score thresholds |
+希望先审阅计划时，明确说“先给我计划，确认后执行”。计划存入 `quality_reports/plans/`；确认后常规步骤继续，不逐项重复询问。
 
-For complex or ambiguous tasks, Claude may ask 3--5 clarifying questions to create a **requirements specification** before planning. Each requirement is tagged MUST/SHOULD/MAY, and each aspect is marked CLEAR/ASSUMED/BLOCKED.
+## 讨论与前沿文献
 
----
-
-# A Typical Workflow
-
-```{mermaid}
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#14142a', 'primaryTextColor': '#d0d0e0', 'primaryBorderColor': '#b44dff', 'lineColor': '#b44dff', 'secondaryColor': '#0c0c18', 'tertiaryColor': '#080810', 'edgeLabelBackground': '#080810'}}}%%
-flowchart LR
-    D(Discovery<br/>Literature + Data):::phase1 --> S(Strategy<br/>Identification Design):::phase2
-    S --> E(Execution<br/>Code + Paper):::phase3
-    E --> R(Review<br/>Simulated Peer Review):::phase4
-    R -->|score >= 95| SUB(Submission<br/>Package + Gate):::phase5
-
-    classDef phase1 fill:#14142a,stroke:#00f0ff,color:#00f0ff,stroke-width:2px
-    classDef phase2 fill:#14142a,stroke:#00cc66,color:#00cc66,stroke-width:2px
-    classDef phase3 fill:#14142a,stroke:#b44dff,color:#b44dff,stroke-width:2px
-    classDef phase4 fill:#14142a,stroke:#ff2d7b,color:#ff2d7b,stroke-width:2px
-    classDef phase5 fill:#14142a,stroke:#00f0ff,color:#00f0ff,stroke-width:2px
+```text
+/discover brainstorm AI 与企业招聘的组织调整
+/discover frontier AI 对劳动需求的最新证据
 ```
 
-You can enter at any stage. Each phase produces structured output saved to `quality_reports/`.
+有价值的讨论应说明：刚学到了什么，哪些解释仍有竞争力，哪个下一步最能改变判断。候选方向可以跨到搜寻、合约、信息或市场势力等领域，但先解释机制与最小检验，不自动变成另一个正在执行的项目。
 
----
+文献记录检索日期、版本、读取范围和原始出处。只读摘要就说明范围；同一研究的工作论文与期刊版去重，并保留相反结果。“本次检索未找到”不等于“从未有人做过”。没有检索工具时，前沿核验为 NOT_RUN。
 
-# Your First Review
+## 建立机制，同时学习
 
-Here is what happens when you run a simulated peer review.
-
-**Step 1.** You type `/review --peer JHR paper/main.tex`
-
-**Step 2.** The **Editor** does a desk review --- checks scope, assigns each referee a disposition (Credibility, Policy, Structuralist, etc.) and pet peeves that shape their personality.
-
-**Step 3.** Two blind referees review independently --- a **domain-referee** (subject expertise) and a **methods-referee** (empirical methods). Neither sees the other's report.
-
-**Step 4.** The editorial decision arrives, classifying every concern as FATAL, ADDRESSABLE, or TASTE:
-
-```markdown
-# Editorial Decision --- Journal of Human Resources
-**Decision:** Major Revisions
-
-## Referee 1 (domain-referee) --- Disposition: Policy
-- ADDRESSABLE: Missing discussion of policy implementation costs (Section 6)
-- ADDRESSABLE: Literature review omits Garcia & Santos (2024) on same population
-- TASTE: Prefer confidence intervals over p-values
-
-## Referee 2 (methods-referee) --- Disposition: Credibility
-- FATAL: Pre-trends test shows significant coefficient at t-2 (Figure 3)
-- ADDRESSABLE: Clustering at state level with 12 states --- use wild bootstrap
-- ADDRESSABLE: No sensitivity analysis (Rambachan & Roth 2023)
-
-## Action Items
-- MUST: Address pre-trends concern (fatal if unresolved)
-- MUST: Add wild bootstrap standard errors
-- SHOULD: Add sensitivity bounds
-- SHOULD: Cite Garcia & Santos (2024)
+```text
+/strategize mechanism 招聘下降可能来自哪些不同机制
+/learn 任务模型中的替代效应与规模效应
+/strategize spine 根据现有证据整理项目主线
 ```
 
-This is what you work with. Each concern has a classification and a specific fix. Use `/revise` to route each comment to the right agent --- new analysis goes to the Coder, clarifications go to the Writer, disagreements get flagged for your review.
+从经济问题和直觉走到 toy model、对象与假设、关键推导、可观察含义及项目应用。复杂方法只有在带来额外洞见时才加入；研究者暂不熟悉不是回避它的理由。
 
-For the full peer review architecture (dispositions, pet peeves, journal calibration), see [Meet the Agents](agents.qmd).
+理论、方法和描述性研究都可以独立推进，不要求先有回归结果。模拟帮助检查直觉，不能替代证明。校准、估计、预测和因果解释分别说明。
 
----
+## 实证分析
 
-# Your First Draft
-
-Here is what happens when you draft a paper section.
-
-**Step 1.** You type `/write intro`
-
-**Step 2.** Claude reads your paper type (reduced-form, structural, descriptive, or theory+empirics), your strategy memo, and any existing sections.
-
-**Step 3.** The Writer drafts using **paragraph-level argument moves** --- each paragraph has one job:
-
-```
-Paragraph 1 [MOTIVATION]: Big question --- why this matters for policy
-Paragraph 2 [GAP]: What the literature hasn't answered
-Paragraph 3 [THIS PAPER]: "We estimate..." --- result preview with magnitude
-Paragraph 4 [IDENTIFICATION]: Source of variation, one-sentence design
-Paragraph 5 [PREVIEW]: Key finding with effect size
-Paragraph 6 [ROADMAP]: Section-by-section guide
+```text
+/analyze 按当前主规格估计，报告样本变化、单位和不确定性
 ```
 
-**Step 4.** A cleanup pass strips 24 known AI writing patterns (hedging, filler phrases, over-signposting).
+代码应让研究者容易找到关键设定、运行入口和主输出。核对键、merge、缺失值、时间顺序和样本限制；短任务可以保持单个脚本，不强制层层抽象。
 
-Each paragraph has one job. The Writer adapts this structure to your paper type --- reduced-form leads with identification preview and result, structural leads with the model and counterfactual, descriptive leads with the data innovation and key fact.
+Stata 默认使用实际可用的 MCP，已配置且有许可的 batch 程序也可以运行。没有运行器就交付脚本与待运行说明，状态为 NOT_RUN。静态 lint 不算估计成功。
 
-For all available sections and flags, see the [Command Reference](reference.qmd).
+重要结果进入 `research/EVIDENCE_LEDGER.md`，记录样本、单位、规格、输出、验证状态，以及支持或挑战哪种解释。零结果和反常符号保留；稳健性针对具体威胁，不为模板不断扩张。
 
----
+## 写作按读者改变
 
-# The Research Pipeline
+| 体例 | 重点 |
+|---|---|
+| 英文学术论文 | 问题、贡献、机制、识别或证明及结论边界 |
+| 中文学术论文 | 用自然中文连接制度背景、机制和证据，术语与论证稳定 |
+| 中文政策报告 | 实际决策、证据、政策选项、执行约束与分配影响 |
+| 英文政策报告 | 读者的选择、权衡、证据强弱及可执行含义 |
 
-## Discovery
+```text
+/write intro --lang en --genre academic
+/write diagnose paper/draft.tex
+/write outline --lang zh --genre policy
+```
 
-`/discover` runs an interactive interview that builds your research specification and produces a **decision record** documenting alternatives considered. Use `/discover --lit` for literature synthesis (Librarian + librarian-critic) or `/discover --data` for data assessment (Explorer + explorer-critic). See the [Command Reference](reference.qmd) for all flags.
+指定主稿和输出格式优先。先修主张与证据、段落和章节，再修词句。领域范文提供可解释的观察，不设句长或被动句配额；没有真实样稿就不声称提取了个人声音。
 
-## Strategy
+保留原意、数字、单位、基准组、样本和限定。相关性不能因主动句变成因果；前趋势不显著不能写成证明平行趋势。较大修改另存并给差异，说明哪些是表达调整、哪些需实质判断。
 
-`/strategize` proposes your identification design via the Strategist + strategist-critic pair. It first produces a **pre-strategy report** (paper type classification, candidate designs), then the full strategy memo with robustness plan and falsification tests. Use `/strategize --pap` for Pre-Analysis Plans (RCT/experimental only). For how strategy adapts to paper types, see [Meet the Agents](agents.qmd).
+## 审查、演讲和投稿
 
-## Execution
+`/review` 选择必要的代码、方法、理论、写作或模拟同行视角，输出定位与理由；没有实际日志的执行检查不能通过。模拟审稿寻找遗漏，不预测接收概率。
 
-`/analyze` handles end-to-end data analysis: cleaning, main specification, robustness, publication-ready tables and figures. The Coder produces a **pre-code report** (naming map, script structure, numerical guards) before writing any code. Use `/review --code` to run a mechanical lint pass before the full code review. `/write` drafts paper sections using argument moves (see "Your First Draft" above). Supports R, Python, and Julia.
+`/revise` 将意见对应到分析、文字和回应。偏离主线的新工作说明价值与代价，未完成的分析不能在 response letter 中写为完成。`/talk` 按听众和时长组织证据，早期 idea talk 明确假说与缺口。
 
-## Review and Revision
+`/submit` 用于目标核验、材料准备和审核。正式对外提交按明确授权，不能从“准备材料”推断已经获准投稿。
 
-`/review` routes automatically based on file type --- paper files get writer-critic + strategist-critic + Verifier; scripts get coder-critic; `--peer` dispatches the full editorial pipeline (see "Your First Review" above). `/revise` classifies each referee comment as NEW ANALYSIS, CLARIFICATION, DISAGREE, or MINOR, and routes to the right agent. See [Meet the Agents](agents.qmd) for the peer review architecture and [Command Reference](reference.qmd) for all flags.
+## 收工与恢复
 
-## Presentations
+```text
+/checkpoint
+```
 
-`/talk create [format]` generates talks derived from your paper in 4 formats: job market (45--60 min), seminar (30--45 min), short (15 min), and lightning (5 min). Supports both **Beamer** (output to `paper/talks/`) and **Quarto RevealJS** (`--quarto`, output to `paper/quarto/`). Talk scores are advisory (non-blocking). See the [Command Reference](reference.qmd) for subcommands.
+只更新有变化的主线、重要证据和决定，再记录下一步。恢复时读当前项目文件、用户最新任务和 Git 差异；不能仅凭最新日志或其他会话的计划继承授权。
 
-## Submission
-
-`/submit --target` recommends journals. `/submit --package` builds an AEA-format replication package. `/submit --audit` runs the Verifier's 10-check audit. `/submit --final` enforces the submission gate (aggregate >= 95, all components >= 80). See the [Command Reference](reference.qmd) for details.
-
-## Utilities
-
-`/tools` provides commit, compile, validate-bib, lint, journal, deploy, learn, and upgrade subcommands. Use `/tools lint` for mechanical code linting (R, Python, Julia) --- runs prohibited-pattern checks before the full coder-critic review.
-
----
-
-# Quality Gates
-
-Every file gets a quality score from 0 to 100, computed as a **weighted aggregate** across components. The orchestrator manages this automatically.
-
-| Score | Gate | Applies To |
-|-------|------|------------|
-| **95+** | Submission | Aggregate + all components >= 80 |
-| **90+** | PR | Weighted aggregate (blocking) |
-| **80+** | Commit | Weighted aggregate (blocking) |
-| **< 80** | Blocked | Must fix before committing |
-| -- | Advisory | Talks (reported, non-blocking) |
-
-These run in the background. You will rarely think about them --- they just prevent broken work from being committed.
-
-See the full [scoring formula](architecture.qmd#scoring-protocol) in the Architecture Reference.
-
----
-
-# Troubleshooting
-
-### LaTeX Won't Compile
-
-**Symptom:** `latexmk` or `xelatex` errors, missing packages.
-
-1. Check you have XeLaTeX and latexmk installed: `which xelatex latexmk`
-2. `paper/latexmkrc` configures TEXINPUTS and BIBINPUTS automatically
-3. Missing package? Install via TeX Live: `tlmgr install [package]`
-4. On Overleaf: set compiler to XeLaTeX via Menu > Compiler (Overleaf reads `latexmkrc` automatically)
-
-### Hooks Not Firing
-
-**Symptom:** No file protection or context survival.
-
-1. Check hooks are configured in `.claude/settings.json`
-2. Ensure Python 3 is available: `which python3`
-3. Check hook file permissions: `ls -la .claude/hooks/`
-
-### Claude Ignores Rules
-
-**Symptom:** Claude doesn't follow conventions in `.claude/rules/`.
-
-1. Rules use `paths:` frontmatter --- check the path matches your files
-2. Too many rules? Claude follows ~150 instructions reliably. Consolidate.
-3. Try: "Read `.claude/rules/[rule].md` and follow it for this task"
-
-### Context Lost After Compaction
-
-**Symptom:** Claude forgets what you were working on.
-
-1. Point Claude to the plan: "Read `quality_reports/plans/[latest].md`"
-2. Check session log: "Read `quality_reports/session_logs/[latest].md`"
-3. The `post-compact-restore.py` hook should print recovery info automatically
-
-### Quality Score Too Low
-
-**Symptom:** Score stuck below 80, can't commit.
-
-1. Run `/review --all` to get detailed issue breakdown
-2. Fix critical issues first (they cost the most points)
-3. Check per-component scores --- one weak component can drag down the aggregate
-
----
-
-# Upgrading {#sec-upgrading}
-
-Run `/tools upgrade` to upgrade your project to the latest clo-author version. It replaces `.claude/` and `templates/`, preserving your paper, scripts, data, bibliography, and CLAUDE.md.
-
-::: {.callout-note}
-**Your files are safe.** The upgrade only touches `.claude/` (the infrastructure) and `templates/`. Your paper, scripts, data, bibliography, and all research content are never modified or deleted.
-:::
-
-**Manual alternative:** Download the [latest release](https://github.com/hugosantanna/clo-author/releases), delete your `.claude/` directory, and copy the new one in. Your CLAUDE.md stays yours --- the infrastructure reads whatever paths you have there.
+机器执行记录在 `quality_reports/runs/`，人读审查在 `quality_reports/reviews/`。旧会话日志保留历史，不与三份研究状态重复抄写。详见[架构与验证](architecture.qmd)。

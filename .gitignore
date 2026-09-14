@@ -56,4 +56,18 @@ paper/quarto/.quarto/
 # Output artifacts — uncomment lines below based on your preference
 # *.rds
 # output/**/*.rds
-docs/
+/docs/
+
+# Research data and private execution artifacts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+data/raw/*
+!data/raw/.gitkeep
+data/cleaned/*
+!data/cleaned/.gitkeep
+data/temp/
+*.smcl
+quality_reports/runs/*.log

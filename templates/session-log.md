@@ -1,40 +1,11 @@
-# Session Log: [Date] -- [Brief Title]
+# 会话交接 — [日期/任务]
 
-**Status:** IN PROGRESS | COMPLETED
+- 当前任务与已授权范围：[内容]
+- 认识的变化：[事实/假说/反证分开，链接PROJECT_BRIEF]
+- 改动：[重要路径与基准版本]
+- 验证：[实际命令/证据及PASS/FAIL/NOT_RUN/NOT_APPLICABLE/STALE]
+- 待确认：[具体选择，没有则写无]
+- 下一步：[可直接接续的一项任务]
+- 提交：[确已创建的hash；尚未提交则如实记录]
 
-## Objective
-[What we set out to accomplish this session]
-
-## Changes Made
-
-| File | Change | Reason | Quality Score |
-|------|--------|--------|---|
-| `path/to/file` | [What changed] | [Why] | [N]/100 |
-
-## Design Decisions
-
-| Decision | Alternatives Considered | Rationale |
-|----------|------------------------|-----------|
-| [Choice made] | [Other options] | [Why this one] |
-
-## Incremental Work Log
-
-**HH:MM UTC:** [event description]
-
-## Learnings & Corrections
-
-- [LEARN:category] What you learned for future reference
-
-## Verification Results
-
-| Check | Result | Status |
-|-------|--------|--------|
-| [What was checked] | [Result] | PASS / FAIL |
-
-## Open Questions / Blockers
-
-- [ ] [Question or blocker]
-
-## Next Steps
-
-- [ ] [What remains]
+同一变化不重复记入多个日志。恢复时核对最新用户请求和磁盘状态，不从日志自动获得新授权。

@@ -1,168 +1,48 @@
 ---
 name: write
-description: Draft academic paper sections using paragraph-level argument moves. Cleanup pass strips AI patterns after drafting. Replaces /draft-paper and /humanizer.
-argument-hint: "[section or mode: intro | strategy | results | conclusion | abstract | full | humanize | style-guide] [file path (optional)]"
-allowed-tools: Read,Grep,Glob,Write,Edit,Task
+description: Draft, diagnose, and revise economics writing in Chinese or English, adapting academic papers and policy reports to readers, evidence, and field exemplars.
+argument-hint: "[section or mode: intro | strategy | results | model | data | conclusion | abstract | full | outline | edit | diagnose | humanize | style-guide] [file] [--lang zh|en] [--genre academic|policy] [--field topic]"
+allowed-tools: Read,Grep,Glob,Write,Edit,Agent,WebSearch,WebFetch
 ---
 
 # Write
 
-Draft paper sections, apply a cleanup pass, or extract a personal style guide from prior papers by dispatching the **Writer** agent.
+保留 `/write` 及 `humanize`、`style-guide` 等原入口。自然语言参数同样有效；从任务或现稿推断语言、体例和章节，避免不必要访谈。默认中文交流，稿件语言按目标读者决定。
 
-**Input:** `$ARGUMENTS` — section name or mode, optionally followed by file path.
+## 先确定稿件与证据
 
----
+1. 读取用户指定主稿和相关部分；没有指定时按项目已确认的主稿路径查找。不要把所有项目都改为 `paper/main.tex`。
+2. 有则读取 `research/PROJECT_BRIEF.md` 及与本段有关的 `research/EVIDENCE_LEDGER.md` 条目；再按需读 `research/literature.md`、`research/theory.md`、`research/strategy.md` 和实际输出，不预装全目录。
+3. 从 `.claude/references/writing-guide.md` 选中英论文或政策体例，读取 `personal-style-guide.md` 的已确认偏好。领域写法从 `writing-exemplars.md` 选合适样本，新领域或体例补查真实原文。
+4. 辨认研究类型：因果实证、描述／测量、结构／量化模型、纯理论／方法、理论与实证结合。无代码、无数据或未完成证明都可以起草相应部分，清晰标记缺口。
 
-## Modes
+## 模式
 
-### `/write [section]` — Draft Paper Section
-Draft a specific section: `intro`, `strategy`, `results`, `conclusion`, `abstract`, or `full`.
+| 入口 | 行为 |
+|---|---|
+| `intro / data / strategy / model / results / conclusion / abstract` | 起草相应部分；结构随研究问题和研究类型调整 |
+| `full` | 在已授权范围完成连贯初稿，汇总待判断项；不为每节强制暂停 |
+| `outline` | 给出主线、各节要解决的问题、已有证据和缺口；替代组织方式仅在有判断价值时提供 |
+| `edit / humanize [file]` | 先修逻辑与重复，再修句子；保留必要术语和限定，不用禁词替换改变研究含义 |
+| `diagnose [file]` | 只诊断结构、主张与证据、读者障碍；给定位、理由和建议，不修改主稿 |
+| `style-guide [file/dir]` | 从用户指定满意样稿或修改提炼候选观察，更新个人风格参考，不编造偏好 |
 
-**Agent:** Writer
-**Output:** LaTeX section file in paper/sections/
+摘要可以根据已有研究计划起草，但须标明是拟稿且结论待定。不能把未来预期结果写成已完成发现。`model` 对纯理论开放，不要求先有实证结果。
 
-Workflow:
+## 起草与修订
 
-#### 1. Context Gathering
+小任务直接完成；大篇幅起草或需要独立角色时通过 `Agent` 委派 `writer`，交代主稿路径、输出路径、语言体例、目标读者、证据范围和授权范围。重大改稿可追加 `writer-critic` 的独立审查；critic 返回报告，由主会话保存，不能改稿。
 
-Before drafting, read all available context:
-1. Read existing paper draft in `paper/` (if it exists)
-2. Read `master_supporting_docs/` for notes, outlines, research specs
-3. Read most recent `quality_reports/research_spec_*.md` or `quality_reports/lit_review_*.md`
-4. Read `.claude/references/domain-profile.md` for field conventions
-5. Check `Bibliography_base.bib` for available citations
-6. Scan `paper/tables/` and `paper/figures/` for generated output
-7. Read `quality_reports/results_summary.md` if it exists (from Coder)
+写作顺序：读者要理解什么 → 主张与证据 → 章节段落作用 → 句子节奏和用词 → 格式。借鉴 exemplar 的论证动作，并说明实际读取范围；不用固定句长、词数比例或作者名气决定质量。
 
-#### 2. Paper Type Detection
+编辑按 `.claude/rules/revision.md` 处理指定主稿、另存版本和 diff。沿用 Word、LaTeX、Markdown 等已有格式；工具无法保留格式或修订记录时，先交付可审阅的文字修改及定位，明确未完成的格式工作，不能声称格式已保留。
 
-Before routing, identify the paper type from the strategy memo or existing draft:
-- **Reduced-form** — DiD, IV, RDD, event study
-- **Structural** — Model estimation, counterfactual simulations
-- **Theory + empirics** — Propositions tested with data
-- **Descriptive / measurement** — New data, new measure, stylized facts
+新稿按项目约定存放；没有约定可用 `paper/`。占位直接写 `[RESULT PENDING: 需要的输出]`、`[SOURCE UNVERIFIED: 待核主张]` 或 `[PROOF PENDING: 缺失步骤]`，不填示意数字伪装结果。已有数据、模型或代码变化后，将相关旧证据标 `STALE`，不能直接复用为当前主张。
 
-This determines which section templates the Writer uses.
+## 核验与交付
 
-#### 3. Section Routing
+核对本次变更涉及的数字、单位、基准组、样本、引用和证据强度。参考文献“存在”与“支持这句话”分别核对；前趋势不显著不能证实平行趋势，相关性不能因润色变成因果。
 
-Based on `$ARGUMENTS`:
-- **`full`**: Draft all sections in sequence, pausing between major sections for user feedback
-- **`intro`**: Draft introduction (most common request)
-- **`strategy`**: Draft empirical strategy (reduced-form), model + estimation (structural), or model + tests (theory+empirics)
-- **`results`**: Draft results — narration style depends on paper type and output type (regression tables, event study figures, counterfactual simulations, etc.)
-- **`conclusion`**: Draft conclusion with type-appropriate ending (policy implications, counterfactual implications, or research agenda)
-- **`abstract`**: Draft abstract (must have other sections first)
-- **`data`**: Draft data section — expanded for descriptive/measurement papers
-- **`model`**: Draft model section (structural or theory+empirics papers only)
-- **No argument**: Ask user which section to draft
+检查状态仅用 `PASS / FAIL / NOT_RUN / NOT_APPLICABLE`，说明证据与适用范围。编译由有执行权限的 writer 或 verifier 运行；未运行就标 `NOT_RUN`，文本静态审查不能替代编译或视觉检查。
 
-#### 4. Dispatch Writer
-
-Dispatch Writer with paper type and argument-move templates for the target section. The writer drafts using paragraph types (motivation, result statement, mechanism, etc.), applies design-specific moves, then runs the cleanup pass. Save to `paper/sections/[section].tex`.
-
-#### 5. Quality Self-Check
-
-Before presenting the draft:
-- [ ] Paper type identified and correct template used
-- [ ] Every paragraph has an identifiable purpose (argument move type)
-- [ ] Findings lead sentences — not buried after setup
-- [ ] Design-specific elements present (see writer.md for checklists per design)
-- [ ] Every displayed equation is numbered (`\label{eq:...}`)
-- [ ] All `\cite{}` keys exist in `Bibliography_base.bib`
-- [ ] Introduction contribution paragraph names specific papers
-- [ ] Effect sizes stated with units
-- [ ] No banned hedging phrases
-- [ ] Notation consistent throughout
-- [ ] All tables/figures referenced actually exist in `paper/tables/` or `paper/figures/`
-- [ ] Results narrated correctly for output type (tables, event study figures, counterfactuals)
-
-#### 6. Present to User
-
-Present each section for feedback. Flag items that need attention:
-- **TBD items:** Where empirical results are needed but not yet available
-- **VERIFY items:** Citations that need user confirmation
-- **PLACEHOLDER items:** Effect sizes awaiting final estimates
-
-### `/write style-guide [paper-dir]` — Extract Personal Voice
-
-One-shot extraction of the user's writing voice from their published or drafted papers. Produces `.claude/references/personal-style-guide.md`, which the writer auto-loads on every subsequent invocation.
-
-**When to run:**
-- Once at the start of a project, after pointing at a directory of the user's prior papers
-- After publishing a new paper that shifts voice (re-run to refresh the profile)
-
-**Input:** `$ARGUMENTS` — path to a directory containing prior papers (.tex or .pdf). If omitted, defaults to `master_supporting_docs/` and scans for .tex/.pdf files.
-
-**Agent:** Writer (style-extraction mode)
-**Output:** `.claude/references/personal-style-guide.md`
-
-Workflow:
-1. **Discover corpus.** List .tex and .pdf files in the target directory. If fewer than 2 papers found, flag and ask before proceeding (style extraction on a single paper overfits).
-2. **Sample strategically.** For each paper, extract:
-   - The full introduction
-   - The first two paragraphs of each major section
-   - The abstract and conclusion
-   - A random sample of 5–10 results-section paragraphs
-   This keeps context usage bounded while capturing voice variation across sections.
-3. **Extract patterns.** The Writer (in style-extraction mode) produces quantitative and qualitative patterns:
-   - Sentence-length distribution (median, 10th–90th pct)
-   - Passive-voice frequency, first-person-plural frequency, em dash rate
-   - Paragraph opening and closing moves
-   - Section-architecture patterns (how introductions open, how results lead)
-   - Lexicon: words used repeatedly, words demonstrably avoided
-   - Hedging and comparison patterns
-   - Citation conventions (textual vs. parenthetical split; papers-per-claim)
-   - Tone markers and anti-patterns already stripped
-4. **Write to `.claude/references/personal-style-guide.md`.** Fill every template section with quoted examples from the corpus. Never invent patterns — if a section has no evidence, write "[insufficient corpus evidence]".
-5. **Present summary.** One-paragraph recap of the voice profile: sentence length, passive rate, signature lexicon, distinguishing tone markers. User confirms before the guide takes effect on subsequent `/write` calls.
-
-Principles for the extraction:
-- **Ground every claim in the corpus.** Each pattern must have at least one quoted example.
-- **Extract, don't prescribe.** The guide records the author's observed behavior, not what the Writer thinks is good style.
-- **Don't duplicate `domain-profile.md`.** The style guide is about voice; the domain profile is about field conventions.
-- **Don't override working-paper-format invariants.** Voice doesn't trump INV-1..21.
-
-### `/write humanize [file]` — Cleanup Pass Only
-Strip AI writing patterns from existing text without rewriting content.
-
-**Agent:** Writer (cleanup mode)
-**Output:** Edited file with AI patterns removed
-
-Strips 24 patterns across 4 categories:
-- Structural: forced narrative arcs, artificial progression
-- Lexical: "delve, leverage, nuanced, robust"
-- Rhetorical: rule-of-three, negative parallelisms, em dash overuse
-- Formatting: excessive bullet points, promotional language
-
----
-
-## Section Standards
-
-**All paper types share the same backbone. Moves diverge by type — see writer.md for full templates.**
-
-| Section | Length | Reduced-Form | Structural | Theory+Empirics | Descriptive |
-|---------|--------|-------------|-----------|----------------|-------------|
-| Introduction | 1000-1500 | ...preview → result → contribution | ...model preview → counterfactual → contribution | ...theory preview → test result → contribution | ...data innovation → key fact → contribution |
-| Data | 800-1200 | Treatment, outcome, controls | Moments that identify parameters | Standard | 1200-1800 (core contribution) |
-| Strategy/Model | 800-1500 | Design-specific (DiD/IV/RDD/ES) | Environment → decisions → equilibrium → estimation | Model → propositions → tests | N/A (merged into Data) |
-| Results | 800-1500 | Main spec → robustness → heterogeneity | Estimates → model fit → counterfactuals → welfare | Prediction-by-prediction evidence | Key facts → decompositions → implications |
-| Conclusion | 500-700 | Policy implications | Counterfactual implications + model limitations | What model gets right/wrong | Research agenda enabled by new data |
-| Abstract | 100-150 | Question, design, finding with magnitude | Question, model, counterfactual finding | Question, prediction, test result | Question, measurement, key fact |
-
----
-
-## LaTeX Conventions
-
-- `\citet{}` for textual citations ("Smith (2024) shows...")
-- `\citep{}` for parenthetical citations ("...is well documented (Smith, 2024)")
-- `booktabs` rules (`\toprule`, `\midrule`, `\bottomrule`) — never `\hline`
-- Notation protocol: `Y_{it}`, `D_{it}`, `\gamma_i`, `\delta_t`, `\varepsilon_{it}`
-
----
-
-## Principles
-- **This is the user's paper, not Claude's.** Match their voice and style.
-- **Never fabricate results.** Use TBD placeholders.
-- **Citations must be verifiable.** Only cite confirmed papers.
-- **Argument moves first, cleanup second.** Draft with structure, then strip AI patterns.
+交付稿件链接、修改理由、保留的未决项和核验范围。正式审查保存 `quality_reports/reviews/YYYY-MM-DD_<task>.md`，同日重名加后缀。必要时用少量改句解释写作判断，让 Hongbo 能继续介入；不自动更换核心研究问题或把建议记成作者决定。

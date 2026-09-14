@@ -1,233 +1,84 @@
 ---
-title: "Command Reference"
-subtitle: "Every Command, Flag, and Subcommand"
+title: "命令参考"
+subtitle: "12 个 Claude skills 与本地脚本"
 ---
 
-# Quick Lookup
+自然语言同样有效。以下是 Claude 项目入口，具体行为以 `.claude/skills/<name>/SKILL.md` 为准。GPT/Codex 使用独立版本说明，不假定支持相同斜杠命令。
 
-| Command | Flags / Modes | What It Does |
-|---------|--------------|-------------|
-| `/new-project [topic]` | --- | Full orchestrated pipeline: idea to paper |
-| `/discover` | `--lit`, `--data`, `--ideate` | Discovery phase: interview, literature, data |
-| `/strategize` | `--pap`, `theory` | Empirical strategy (4 paper types), pre-analysis plan, or formal theory section |
-| `/analyze [dataset]` | `--dual [langs]` | End-to-end data analysis (single or parallel language) |
-| `/write [section]` | `--humanize`, `style-guide` | Draft sections, strip AI patterns, or extract personal voice from prior papers |
-| `/review [file]` | `--peer [journal]`, `--peer --r2`, `--stress [journal]`, `--methods`, `--theory`, `--proofread`, `--code`, `--replicate [lang]`, `--all` | Quality reviews (routes by target + flags) |
-| `/revise [report]` | --- | R&R cycle: classify + route referee comments |
-| `/talk` | `create`, `audit`, `compile` | Beamer presentations |
-| `/submit` | `--target`, `--package`, `--audit`, `--final` | Submission pipeline |
-| `/tools` | `commit`, `compile`, `validate-bib`, `journal`, `context`, `deploy`, `learn`, `lint`, `upgrade` | Utilities |
-| `/checkpoint` | `--auto`, `--memory-only`, `--scaffold-only`, `--dry-run`, `--setup-obsidian` | Session handoff: memory + SESSION_REPORT + research journal (+ Obsidian if configured) |
+## 研究与学习
 
----
+| 命令 | 用途 |
+|---|---|
+| `/new-project [问题]` | 明确项目和当前阶段，不自动执行到投稿 |
+| `/discover interview [问题]` | 根据上下文补关键未知，不做固定问卷 |
+| `/discover lit [问题]` | 文献地图、版本、读取范围和来源 |
+| `/discover data [需求]` | 测量、访问、识别兼容性和成本 |
+| `/discover brainstorm [问题]` | 竞争机制、创新和最小检验；`ideate` 为兼容入口 |
+| `/discover frontier [问题]` | 当次核验的近期变化、直接竞争和相反证据 |
+| `/strategize strategy [问题]` | estimand、设计、威胁和路线比较 |
+| `/strategize mechanism [问题]` | 最小机制模型与可检验含义 |
+| `/strategize theory [问题]` | 经济或计量理论、条件、证明和边界 |
+| `/strategize spine` | 从结果和反证整理主线 |
+| `/strategize pap` | 分析计划、制定日期、已知结果和偏离；`pap interactive` 按需澄清 |
+| `/learn [概念或方法]` | 直觉、toy model、假设与推导、项目应用 |
 
-# `/new-project`
+`/new-project` 是研究对话技能，`scripts/new_project.py` 是创建本地目录的脚本，二者用途不同。
 
-```
-/new-project [topic]
-```
+## 分析与写作
 
-Launches the full orchestrated pipeline. Claude conducts a research interview, builds a spec, then runs Discovery → Strategy → Execution → Peer Review → Submission autonomously.
+`/analyze [数据或任务]` 实现已授权分析，明确样本、单位、目标量和推断，保留真实运行记录。`--dual stata,python` 等选项用于明确需要的跨语言比较；一致结果仍可能包含共同错误。
 
-**Agents:** All (orchestrator-managed)
-**Output:** Complete project scaffold + research spec + domain profile
+`/write` 支持 intro、data、strategy、model、results、conclusion、abstract 和 full。其他模式如下：
 
----
+| 模式 | 用途 |
+|---|---|
+| `outline` | 主线、各节任务、证据与缺口 |
+| `edit [文件]` / `humanize [文件]` | 修逻辑、重复与句子，保留原意和证据强度 |
+| `diagnose [文件]` | 只诊断并定位，不修改主稿 |
+| `style-guide [文件或目录]` | 从指定满意样稿和修改提炼候选观察 |
 
-# `/discover`
+可用 `--lang zh` 或 `--lang en`，`--genre academic` 或 `--genre policy`，以及 `--field [领域]`。已知信息不重复问；未完成结果和证明用明确占位，不能填示意数字当发现。
 
-```
-/discover                       Interactive research interview (default)
-/discover --lit [topic]         Literature review
-/discover --data [question]     Data source discovery
-/discover --ideate [topic]      Research question generation
-```
+## 审查、回应与演讲
 
-| Mode | Agents | Output |
-|------|--------|--------|
-| *(default)* | Direct conversation | Research spec + domain profile |
-| `--lit` | Librarian → librarian-critic | Annotated bibliography + BibTeX + frontier map |
-| `--data` | Explorer → explorer-critic | Ranked data sources with feasibility grades (A/B/C/D) |
-| `--ideate` | Direct generation | 3--5 research questions with strategies |
+| 入口 | 用途 |
+|---|---|
+| `/review [文件]` | 根据目标选择必要审查 |
+| `/review --code`、`--methods`、`--theory` | 指定审查侧重 |
+| `/review --peer [期刊]` | 模拟同行视角，不预测接收概率 |
+| `/revise [审稿意见]` | 分类、必要修改、另存修订和逐点回应 |
+| `/talk create`、`audit`、`compile` | 创建、检查或构建演讲 |
+| `/submit target`、`package`、`audit`、`final` | 目标、材料、复现审核与就绪检查；正式提交按授权 |
 
-**Saves to:** `quality_reports/`
+`/talk` 保留 job-market、seminar、short、lightning 场合与 `--quarto`。已有主稿格式优先；没有渲染图像时，视觉检查必须标 NOT_RUN。
 
----
+## 交接与维护
 
-# `/strategize`
+`/checkpoint` 更新状态和下一步。`--dry-run` 只展示，`--memory-only` 只处理已配置且有权限的 memory，`--scaffold-only` 只保存项目状态。`--setup-obsidian` 准备并核验本地配置，不自动获得同步授权。
 
-```
-/strategize [question]          Design identification strategy
-/strategize --pap [spec]        Draft pre-analysis plan (AEA/OSF/EGAP format)
-```
+`/tools` 保留 compile、validate-bib、lint、commit、journal、learn 和 upgrade 等用途。`/tools learn` 总结工作流经验，与学习经济学的 `/learn` 不同。Git 和外部动作按授权范围执行。
 
-| Mode | Agents | Output |
-|------|--------|--------|
-| *(default)* | Strategist → strategist-critic | Strategy memo (paper-type aware) + robustness plan + falsification tests |
-| `--pap` | Strategist (PAP mode) | Pre-analysis plan in AEA/OSF/EGAP format *(primarily experimental/RCT)* |
+## 本地初始化
 
-**Saves to:** `quality_reports/strategy_memo_[topic].md`
+在工作流库根目录运行：
 
----
-
-# `/analyze`
-
-```
-/analyze [dataset path or goal]
-/analyze --dual r,python        Parallel analysis in two languages
+```bash
+python3 scripts/new_project.py "../paper-question" --lang stata
 ```
 
-End-to-end analysis: data cleaning → main specification → robustness → publication tables and figures. Reads the strategy memo (if it exists) and implements it faithfully.
+支持 stata、python、r、julia。已有目录不覆盖，默认不初始化 Git；`--git` 只创建本地仓库，`--no-git` 保留兼容。不安装依赖或改全局配置。
 
-| Mode | Agents | Output |
-|------|--------|--------|
-| *(default)* | Data-engineer + Coder → coder-critic | Scripts, tables, figures in one language |
-| `--dual [langs]` | Data-engineer + 2 Coders in parallel → 2 coder-critics + comparison | Same outputs in both languages + convergence report |
+## 记录一次运行
 
-**Languages:** R, Python, Julia
-**Saves to:** `scripts/`, `paper/tables/`, `paper/figures/`, `quality_reports/cross_language_comparison.md`
+假设已经按 Python reference 保存 `describe.py` 并准备输入 CSV：
 
-**Cross-language replication:** When `--dual` is used, both implementations run the same specification independently. Results are compared against tolerances in `domain-profile.md`. Divergences are flagged. Inspired by Scott Cunningham's approach: if two independent implementations agree, neither has a bug.
-
----
-
-# `/write`
-
-```
-/write intro                    Introduction (paper-type-specific moves)
-/write strategy                 Empirical strategy / Model (design-specific)
-/write results                  Results (narration by output type)
-/write conclusion               Conclusion (type-specific ending)
-/write data                     Data section (expanded for descriptive papers)
-/write model                    Model section (structural / theory+empirics only)
-/write abstract                 Abstract (100-150 words)
-/write full                     All sections
-/write --humanize [file]        Strip AI writing patterns only
+```bash
+python3 scripts/run_check.py --input scripts/python/describe.py --input data/cleaned/sample.csv --output paper/tables/group_means.json --report quality_reports/runs/2026-09-13_describe.json -- python3 scripts/python/describe.py
+python3 scripts/run_check.py --verify quality_reports/runs/2026-09-13_describe.json
 ```
 
-| Mode | Agent | Output |
-|------|-------|--------|
-| `[section]` | Writer | LaTeX section in `paper/sections/` |
-| `--humanize` | Writer (cleanup mode) | Edited file with 24 AI patterns stripped |
+`--input`、`--output` 可重复，每项为文件。`--cwd` 决定命令和输入输出的相对路径，`--report` 相对调用者当前目录。每次选新记录名；已有旧输出不能掩盖本次失败。
 
-The Writer first identifies the paper type (reduced-form, structural, theory+empirics, descriptive), then drafts using paragraph-level argument moves with type-specific section templates. Cleanup pass runs automatically after drafting.
+`--verify` 只核对已有指纹，不重新执行。覆盖范围仅限声明的代码、数据、配置及其他依赖；Stata MCP 运行保存等价证据并检查真实日志。
 
----
-
-# `/review`
-
-```
-/review paper/main.tex          Comprehensive (auto-detect paper)
-/review scripts/R/analysis.R    Code review (auto-detect script)
-/review --peer                  Blind peer review (generic)
-/review --peer JHR              Blind peer review (calibrated to JHR)
-/review --peer --r2             R&R round 2 (referees remember prior reports)
-/review --stress JHR            Maximum-severity stress test (max 3 rounds)
-/review --methods [file]        Causal audit only
-/review --proofread [file]      Manuscript polish only
-/review --code [file]           Code quality only
-/review --replicate python      Re-implement in another language, compare
-/review --all                   All critics in parallel + weighted score
-```
-
-| Flag | Agents | What It Checks |
-|------|--------|---------------|
-| *(auto .tex)* | writer-critic + strategist-critic + Verifier | Writing + identification + compilation |
-| *(auto .R/.py)* | coder-critic | Code quality and reproducibility |
-| `--peer` | Editor + domain-referee + methods-referee | Editor desk review → referee assignment with dispositions → blind reports → editorial decision |
-| `--peer [journal]` | Editor + domain-referee + methods-referee | Same, calibrated to that journal's review culture |
-| `--peer --r2` | Editor + domain-referee + methods-referee | R&R round 2 --- referees remember prior reports |
-| `--stress [journal]` | Editor + domain-referee + methods-referee | Maximum-severity stress test (max 3 rounds) |
-| `--methods` | strategist-critic | 4-phase causal design review |
-| `--proofread` | writer-critic | Notation, hedging, LaTeX, claims vs evidence |
-| `--code` | coder-critic | Code quality (no strategy comparison) |
-| `--replicate [lang]` | Coder (replication) + coder-critic | Re-implement in target language, compare outputs |
-| `--all` | All critics in parallel | Weighted aggregate score |
-
-**Referee dispositions:** Each referee is assigned one of 6 dispositions (Structuralist, Credibility, Measurement, Policy, Theory, Skeptic) plus pet peeves (1 critical + 1 constructive). Every major comment includes "what would change my mind."
-
-**Editorial decision:** The Editor classifies each issue as FATAL (rejection-worthy), ADDRESSABLE (fixable in revision), or TASTE (referee preference, not binding).
-
-**Journal calibration:** When a journal name is provided with `--peer`, the Editor and both referees read `.claude/references/journal-profiles.md` and adapt their priorities, bar, and checklist to that journal. 30 journals are pre-populated (economics and adjacent fields); unknown journals still get adapted review using the journal name + your domain profile. You can add custom profiles.
-
-**Saves to:** `quality_reports/`
-
----
-
-# `/revise`
-
-```
-/revise [referee-report-path]
-```
-
-For **real** R&R responses (not the simulated `/review --peer`). Give it your actual referee report and Claude classifies each comment, then routes to the right agent:
-
-| Classification | Routed To | Action |
-|---------------|-----------|--------|
-| **NEW ANALYSIS** | Coder agent | Flag for user, create analysis task |
-| **CLARIFICATION** | Writer agent | Draft revised text |
-| **REWRITE** | Writer agent | Structural revision |
-| **DISAGREE** | You (the user) | Draft diplomatic pushback (flagged for your review) |
-| **MINOR** | Writer agent | Fix directly |
-
-**Output:** Point-by-point response letter + revised sections + tracking document
-**Saves to:** `quality_reports/referee_response_[journal]_[date].tex`
-
----
-
-# `/talk`
-
-```
-/talk create job-market          Full talk (45-60 min, 40-50 slides)
-/talk create seminar             Standard seminar (30-45 min, 25-35 slides)
-/talk create short               Conference session (15 min, 10-15 slides)
-/talk create lightning           Elevator pitch (5 min, 3-5 slides)
-/talk create [format] --quarto   Quarto RevealJS version (output to paper/quarto/)
-/talk audit [file]               Visual layout check
-/talk compile [file]             XeLaTeX or Quarto compilation
-```
-
-| Mode | Agents | Output |
-|------|--------|--------|
-| `create` | Storyteller → storyteller-critic | Beamer `.tex` in `paper/talks/` |
-| `create --quarto` | Storyteller → storyteller-critic | Quarto `.qmd` in `paper/quarto/` |
-| `audit` | Visual checks | Layout issues report |
-| `compile` | XeLaTeX or Quarto | Compiled PDF or HTML |
-
-Talk scores are **advisory** (non-blocking).
-
----
-
-# `/submit`
-
-```
-/submit --target                 Journal recommendations
-/submit --package                Build AEA replication package
-/submit --audit                  Audit replication package (10 checks)
-/submit --final [journal]        Final gate: score >= 95, all components >= 80
-```
-
-| Mode | Agents | Output |
-|------|--------|--------|
-| `--target` | Orchestrator | Ranked list of 3 journals with rationale |
-| `--package` | Coder + Verifier | Master script + README + data docs in `Replication/` |
-| `--audit` | Verifier (10 checks) | Pass/fail replication audit |
-| `--final` | All + gate enforcement | Cover letter draft + submission checklist (or blocking issues) |
-
----
-
-# `/tools`
-
-```
-/tools commit [message]          Stage + commit (+ optional PR)
-/tools compile [file]            latexmk compilation (XeLaTeX + biber)
-/tools validate-bib              Cross-reference all \cite{} keys
-/tools journal                   Research journal timeline
-/tools context                   Context status + session health
-/tools deploy                    Render guide + push to GitHub Pages
-/tools learn                     Extract session discoveries to MEMORY.md
-/tools lint [file|dir]           Mechanical code linting for R/Python/Julia
-/tools upgrade                   Upgrade clo-author infrastructure
-```
-
-Each subcommand is lightweight --- no multi-agent orchestration.
+工作流库维护另运行 `python3 scripts/validate_workflow.py` 和 `python3 -m unittest discover -s tests`；不将库测试称为某篇论文已经复现。

@@ -1,73 +1,18 @@
 ---
 name: submit
-description: Submission pipeline — journal targeting, replication package, audit, and final gate. Replaces /submit, /target-journal, /audit-replication, /data-deposit.
-argument-hint: "[mode: target | package | audit | final] [journal name (optional)]"
-allowed-tools: Read,Grep,Glob,Write,Bash,Task
+description: Prepare journal targeting, manuscript and replication packages, and audit readiness against verified destination requirements.
+argument-hint: "[target | package | audit | final] [journal or manuscript]"
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash, Agent, WebSearch, WebFetch
 ---
-
 # Submit
 
-Submission pipeline with four modes covering journal selection through final verification.
+Preserve the user's manuscript, authorship and chosen destination. Read the project brief, evidence ledger and actual validation records. No score certifies a paper as ready for submission.
 
-**Input:** `$ARGUMENTS` — mode keyword, optionally followed by journal name.
+- `target`: compare fit of the economic question, contribution and evidence to actual recent papers; check official requirements using `.claude/references/journal-profiles.md`. Separate rules from judgment; avoid prestige-based demands for additional models.
+- `package`: prepare a versioned manuscript and replication directory under `paper/replication/` or the user path. Document data provenance/access, exact dependencies, master entrypoint, seeds, runtime and figure/table mapping. Restricted data are described without redistribution; synthetic data are labeled and their testing limits stated.
+- `audit`: use verifier and relevant critics to inspect actual runs, numeric claims, citations, anonymous files and current destination requirements. A missing run is NOT_RUN, stale evidence is STALE. Compare manuscript and package versions.
+- `final`: resolve or explicitly disclose applicable material issues; produce a concrete list of files and remaining limitations. Final means readiness review, not an instruction to click a journal portal's submit button.
 
----
+Installing dependencies, sharing confidential material, author attestations and external submission follow the user's specific authorization and actual access. Do not repeat permission already granted; do not infer permission to publish from permission to prepare. A response or cover letter must not claim analyses or approvals that did not occur.
 
-## Modes
-
-### `/submit target` — Journal Targeting
-Get ranked journal recommendations.
-
-**Agent:** Orchestrator (journal selection function)
-
-Considers: contribution fit, methodology fit, audience fit, recent publications, desk rejection risk. Consults .claude/references/domain-profile.md for journal tiers.
-
-Output: Ranked list of 3 target journals with rationale.
-Save to `quality_reports/journal_recommendations_[date].md`
-
-### `/submit package` — Build Replication Package
-Assemble AEA-compliant replication package.
-
-**Agents:** Coder + Verifier
-
-Produces:
-- Master script that runs all analyses end-to-end
-- README with data sources, computational requirements, instructions
-- Data documentation and codebook
-- Organized file structure per AEA standards
-Save to `paper/replication/`
-
-### `/submit audit` — Audit Replication Package
-Verify replication package completeness.
-
-**Agent:** Verifier (submission mode — 10 checks)
-
-Checks:
-1. Master script exists and runs
-2. All tables reproduce
-3. All figures reproduce
-4. README complete
-5. Data documentation present
-6. Numbered script order
-7. Dependencies listed
-8. Runtime documented
-9. Output paths match paper references
-10. No hardcoded paths
-
-### `/submit final [journal]` — Final Submission Gate
-Full verification + score enforcement + submission checklist.
-
-Workflow:
-1. Run comprehensive review if not done recently
-2. Run replication audit
-3. Check score gate: aggregate >= 95, all components >= 80
-4. If PASS: generate cover letter draft + submission checklist
-5. If FAIL: list blocking issues and stop
-
----
-
-## Principles
-- **Score >= 95 + all components >= 80. No exceptions.**
-- **Don't skip verification.** Even if reports exist, check they're recent.
-- **If it fails, stop.** Don't generate materials for a failing paper.
-- **Cover letter is a draft.** User must review before sending.
+Reference the current [AEA policies](https://www.aeaweb.org/journals/data) or destination's own policy and [replication README guidance](https://social-science-data-editors.github.io/template_README/). Stata `version` does not freeze user-written ado packages. Internal audit is not a journal's compliance certification.

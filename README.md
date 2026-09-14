@@ -1,186 +1,63 @@
-# The Clo-Author: AI Research Architecture for Economics
+# Hongbo 的经济学研究工作流
 
-[![Version](https://img.shields.io/github/v/release/hugosantanna/clo-author?style=flat-square&color=b44dff&label=version)](CHANGELOG.md)
+用于研究讨论、前沿文献、经济机制、实证分析、论文和政策写作。默认中文交流、Stata分析；AI负责检索、实现和核查，并把主线、证据和重要选择清楚交还研究者。学习新理论和方法是工作的一部分。
 
-> **Work in progress.** This repo is evolving as I learn, and I share it in case others find it useful and would like to build upon it. Expect rough edges.
+本库由 [clo-author](https://github.com/hugosantanna/clo-author) 和 [Pedro Sant’Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow) 改造。原路径继续为Claude版，文件与命令命名保持。
 
-An open-source [Claude Code](https://docs.anthropic.com/en/docs/claude-code) scaffold for empirical economics research. Provides structured workflows from literature review to journal submission. Can be adapted to other fields (finance, accounting, marketing, management) by customizing the domain profile and journal profiles.
+## 两个独立版本
 
-**Live guide:** [hugosantanna.github.io/clo-author](https://hugosantanna.github.io/clo-author/)
-<br>**Built on:** [Pedro Sant'Anna's claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow)
+| 版本 | 入口 | 使用 |
+|---|---|---|
+| Claude Code | [CLAUDE.md](CLAUDE.md)、[快速参考](.claude/WORKFLOW_QUICK_REF.md) | 使用当前目录的技能；新论文由下面的初始化命令创建 |
+| GPT / Codex | [gpt-workflow/README.md](gpt-workflow/README.md) | 完整独立目录，使用其AGENTS.md、skills、配置和初始化工具；可复制出去 |
 
----
+研究原则相同，调用和执行能力分别适配。Claude初始化不复制GPT版，GPT初始化不复制Claude版；两版不会自动互写记忆或研究状态。
 
-## Quick Start
+## 创建第一个项目
+
+本地需要Python 3.9+和所用客户端；Stata/LaTeX等只在任务实际用到时需要，不在初始化时安装。
 
 ```bash
-# 1. Fork and clone
-gh repo fork hugosantanna/clo-author --clone
-cd clo-author
-
-# 2. Open Claude Code
-claude
+python3 scripts/new_project.py ../paper-my-question --lang stata
 ```
 
-Then paste this prompt:
+进入新目录并启动Claude Code。可以直接说：
 
-> I am starting a new empirical research project in **[YOUR FIELD]** on **[YOUR TOPIC]**.
-> Read CLAUDE.md and help me set up the project structure.
-> Start with a literature review on [YOUR TOPIC].
+> 我想研究AI如何改变企业的任务分工与招聘。先帮助我比较机制、最近相关文献和能区分这些解释的证据，再建议值得先做的一步。
 
-Claude reads the configuration, fills in your project details, and plans the approach — you approve the plan, it implements and runs review agents, and you review the results.
+生成器读取当前工作区模板，拒绝覆盖已有目录，不带入本库的历史、数据、私人设置或另一版。默认不初始化Git；`--git`只建立本地仓库，不commit或创建远端。旧 `new-paper` 入口的简短调用方式见 [cheatsheet](cheatsheets/new-paper-function.md)，不会自动改你的 `~/.zshrc`。
 
-**Using VS Code?** Open the Claude Code panel instead. Everything works the same.
+## 日常使用
 
----
+| 你在做什么 | 入口与结果 |
+|---|---|
+| 想问题、找新方向 | `/discover brainstorm`；机制、证据、替代解释、最小检验 |
+| 跟踪前沿 | `/discover frontier`；日期、版本、读取范围与相邻/相反文献 |
+| 设计或收敛项目 | `/strategize mechanism`、`/strategize focus`；主线与下一项判断 |
+| 学一个新方法 | `/learn`；问题→直觉→toy model→假设/推导→项目应用 |
+| 分析 | `/analyze`；简洁脚本、关键检查、真实输出 |
+| 写作 | `/write`；中英学术/政策分体例，按领域实际范文调整 |
+| 审查与修订 | `/review`、`/revise`；具体证据、重要问题与可审阅修订 |
+| 演讲与投稿准备 | `/talk`、`/submit`；匹配受众及经核实的目标要求 |
+| 收工与恢复 | `/checkpoint`；简短状态与可接续任务 |
 
-## What It Does
+自然语言请求同样有效；不必先学完全部命令。主线程在授权范围内连续完成工作，重大研究方向选择给具体建议供你判断。
 
-### How It Works
+## 研究状态与写作
 
-You describe a task. Claude plans the approach (you approve), implements it, runs specialized review agents, fixes issues, re-verifies, and scores against quality gates. You review the output at each stage.
+先只维护一页 `research/PROJECT_BRIEF.md`。有重要结果或选择时，再建立 `EVIDENCE_LEDGER.md` 和 `DECISIONS.md`。文献与代码的详细记录通过链接展开，避免靠几十份日志重建研究背景。主线服从证据，零结果和反证保留。
 
-### Specialized Agents in Worker-Critic Pairs
+写作先修经济逻辑和主张—证据关系，再修句子。保留指定主稿、格式与个人偏好；大改另存并提供diff。四类体例、范文观察与实际出处见 [writing guide](.claude/references/writing-guide.md)。不以固定句长、被动句比例或期刊刻板印象定义好文章。
 
-Every creator has a paired critic. Critics can't edit files; creators can't score themselves.
+模板包括[主线](templates/project-brief.md)、[证据账](templates/evidence-ledger.md)、[决定](templates/decision-record.md)、[审查](templates/quality-report.md)、[交接](templates/session-log.md)、[探索](templates/exploration-readme.md)、[归档](templates/archive-readme.md)、[任务范围](templates/requirements-spec.md)、[可选项目约定](templates/constitutional-governance.md)、[skill](templates/skill-template.md)、[项目指令](templates/project-claude.md)与[项目README](templates/project-readme.md)。按需使用。
 
-| Phase | Worker (Creates) | Critic (Reviews) |
-|-------|-----------------|-----------------|
-| Discovery | Librarian | librarian-critic |
-| Discovery | Explorer | explorer-critic |
-| Strategy | Strategist | strategist-critic |
-| Execution | Coder | coder-critic |
-| Execution | Data-engineer | coder-critic |
-| Paper | Writer | writer-critic |
-| Peer Review | Editor → domain-referee + methods-referee | — |
-| Presentation | Storyteller | storyteller-critic |
-| Infrastructure | Orchestrator, Verifier | — |
+## 验证与维护
 
-### Simulated Peer Review
-
-`/review --peer [journal]` simulates a full journal submission:
-
-1. **Editor desk review** — reads your paper, verifies novelty claims via web search, decides: desk reject or send to referees
-2. **Referee assignment** — editor selects two referees with intellectual dispositions (Structuralist, Credibility, Measurement, Policy, Theory, Skeptic) weighted by journal culture
-3. **Independent blind reports** — each referee scores on 5 dimensions with pet peeves (1 critical, 1 constructive), and every major comment includes "what would change my mind"
-4. **Editorial decision** — editor classifies each concern as FATAL / ADDRESSABLE / TASTE, sides with one referee when they disagree, produces MUST / SHOULD / MAY action items
-
-Additional modes:
-- `--stress [journal]` — adversarial referees for pre-submission battle testing
-- `--peer --r2 [journal]` — R&R second round with referee memory (checks whether prior concerns were addressed)
-- Max 3 rounds, then the editor's patience runs out — just like real life
-
-**30 journal profiles** across economics and adjacent fields (all top-tier, A* in the Australian Business Deans Council ranking), each with configured referee pools based on published style guides and common review culture.
-
-### 10 Slash Commands
-
-| Category | Commands |
-|----------|----------|
-| **Research** | `/new-project`, `/discover`, `/strategize`, `/analyze`, `/write` |
-| **Review** | `/review`, `/revise` |
-| **Output** | `/talk`, `/submit` |
-| **Tools** | `/tools` (commit, compile, validate-bib, journal, learn, deploy, context) |
-
-### Quality Gates
-
-Weighted aggregate scoring with per-component minimums:
-
-| Score | Gate | Applies To |
-|-------|------|------------|
-| 80 | Commit | Weighted aggregate (blocking) |
-| 90 | PR | Weighted aggregate (blocking) |
-| 95 | Submission | Aggregate + all components >= 80 |
-| -- | Advisory | Talks (reported, non-blocking) |
-
----
-
-## Project Structure
-
-```
-your-project/
-├── CLAUDE.md                    # Project configuration (fill in placeholders)
-├── .claude/                     # Agents, skills, rules, references, hooks
-├── Bibliography_base.bib        # Centralized bibliography
-├── paper/                       # Main LaTeX manuscript (source of truth)
-│   ├── main.tex
-│   ├── sections/
-│   ├── figures/
-│   ├── tables/
-│   ├── talks/                   # Beamer presentations
-│   ├── quarto/                  # Quarto RevealJS presentations
-│   ├── preambles/               # Shared LaTeX headers
-│   ├── supplementary/           # Online appendix
-│   └── replication/             # Replication package for deposit
-├── data/                        # Raw and cleaned datasets
-├── scripts/                     # Analysis code (R, Python, Julia)
-├── quality_reports/             # Plans, session logs, reviews, scores
-├── explorations/                # Research sandbox
-└── master_supporting_docs/      # Reference papers and data docs
+```bash
+python3 scripts/validate_workflow.py
+python3 -m unittest discover -s tests
 ```
 
----
+状态为PASS/FAIL/NOT_RUN/NOT_APPLICABLE；输入变化使旧证据STALE。静态检查、编译、实际分析、识别判断和写作审查分别报告；模型分数不认证研究质量。hooks只覆盖声明的事件和操作范围，能力边界与实际运行情况见[验证报告](quality_reports/reviews/2026-09-13_workflow-validation.md)。
 
-## Prerequisites
-
-| Tool | Required For | Install |
-|------|-------------|---------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Everything | `npm install -g @anthropic-ai/claude-code` |
-| XeLaTeX | Paper compilation | [TeX Live](https://tug.org/texlive/) or [MacTeX](https://tug.org/mactex/) |
-| R | Analysis & figures | [r-project.org](https://www.r-project.org/) |
-| [gh CLI](https://cli.github.com/) | GitHub integration | `brew install gh` (macOS) |
-
-Optional: Python, Julia (for multi-language analysis), [Quarto](https://quarto.org) (web slides).
-
----
-
-## Setup
-
-1. **Fill in `CLAUDE.md`** — replace `[BRACKETED PLACEHOLDERS]` with your project details
-2. **Fill in the domain profile** (`.claude/references/domain-profile.md`) — your journals, data sources, identification strategies, conventions, and seminal references. Use `/discover interview` to populate it interactively.
-3. **Add journal profiles** — 30 profiles are included (economics and adjacent fields). Add your own to `.claude/references/journal-profiles.md` using the template at the bottom of the file.
-4. **Configure your language** — R is the default; Python and Julia are also supported. Set your preference in CLAUDE.md.
-
-**Adapting to other fields:** The pipeline assumes economics by default (causal inference methods, working paper format, AEA-style conventions). To adapt for finance, accounting, marketing, or management, customize the domain profile and journal profiles. The agents, rules, and section templates will follow the domain profile's field specification.
-
----
-
-## Origin
-
-This project builds on [Pedro Sant'Anna's claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow), which was built for Econ 730 at Emory University. The Clo-Author reorients that infrastructure from lecture production to empirical economics research.
-
-Maintained by [Hugo Sant'Anna](https://hsantanna.org) at UAB.
-
----
-
-## Upgrading from 2.x
-
-Your files are safe. The upgrade only touches `.claude/` (infrastructure). Your paper, scripts, data, and bibliography are never modified.
-
-1. **Download** the [latest release](https://github.com/hugosantanna/clo-author/releases) or clone clo-author into a temp folder
-2. **Delete** your old `.claude/` directory
-3. **Copy** the new `.claude/` into your project
-4. **Done** — your CLAUDE.md, paper, scripts, and data are untouched
-
-No git merge, no upstream remote, no conflicts. Once on 4.0, future upgrades can use `/tools upgrade`.
-
----
-
-## Context Efficiency
-
-The architecture loads fewer tokens per session by demand-loading reference files (journal profiles, domain profiles, coding standards) only when agents need them. Rules are path-scoped where possible.
-
----
-
-## Limitations
-
-- **Scaffold, not autopilot.** Every output — drafts, analysis, reviews — needs human review. Claude plans and executes; you decide what ships.
-- **Simulated peer review** catches structural issues (missing robustness, identification gaps, notation errors) but does not replicate actual referee expertise or field-specific judgment.
-- **Journal profiles** are based on published style guides and common review culture, not empirical calibration against actual editorial decisions.
-- **Quality scores** are heuristic deduction rubrics. They flag problems reliably but do not measure publishability.
-- **The writer produces drafts.** It does not replace your writing process — it gives you structured first drafts to revise.
-
----
-
-## License
-
-MIT License. Fork it, customize it, make it yours.
+更多说明见 [中文上手](tutorial/QUICKSTART_zh.md)、[迁移与维护](cheatsheets/workflow-architecture.md)及 [guide](guide/index.qmd)。升级先看差异，保留项目定制；不删除整个 `.claude/`。本库不自动安装全局设置、不发布网站、不上传研究数据。

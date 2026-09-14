@@ -1,115 +1,60 @@
 ---
-title: "The Clo-Author"
-subtitle: "AI Research Architecture for Economics"
+title: "Hongbo 的经济学研究工作流"
+subtitle: "把研究主线、证据和重要选择留在研究者手中"
 ---
 
-An open-source [Claude Code](https://docs.anthropic.com/en/docs/claude-code) scaffold for empirical economics research --- from literature review to journal submission. Can be adapted to adjacent fields (finance, accounting, marketing, management) by customizing the domain profile and journal profiles.
+这个工作流用于经济问题讨论、前沿文献、理论学习、实证分析，以及论文和政策写作。默认中文交流、Stata 分析；已有工具和用户指定主稿优先。AI 完成检索、实现和核查，同时说清证据改变了什么判断、下一步为什么值得做。
 
-**Built on** [Pedro Sant'Anna's claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow), reoriented for empirical research publication.
+这是可以复制到实际项目中的工作流库。这里的研究兴趣、示例和模板，不是任何论文已经确认的设定或发现。
 
-You describe a task in plain English. Claude plans the approach (you approve), dispatches specialized agents, reviews quality, fixes issues, and presents results --- 17 agents, 10 commands, all running behind the scenes. You review the output at each stage.
+## 选择版本
 
-## Get Started in 5 Minutes
+| 版本 | 项目入口 | 说明 |
+|---|---|---|
+| Claude Code | `CLAUDE.md` 与 `.claude/` | 保留原有文件、agents 和命令名称，本指南主要介绍这一版 |
+| GPT / Codex | 独立的 `gpt-workflow/` | 使用自己的 `AGENTS.md`、skills、配置和工具，按该目录 README 操作 |
 
-### Step 1: Fork & Clone
+两版共享经济学原则，执行能力分别适配。Claude 初始化不带入 GPT 版；两版不会自动共享会话状态或改写另一版设置。GPT 的具体入口见[仓库内的独立版本](https://github.com/hbli3309-web/hb-workflow/tree/main/gpt-workflow)。
+
+## 创建一个项目
+
+需要 Python 3.9+ 和实际使用的客户端。Stata、R、Julia、LaTeX 等在相应任务中才需要，初始化不安装这些软件。[Claude Code 官方说明](https://code.claude.com/docs/en/overview)提供客户端安装与启动方式。
+
+尚未取得本库时可以先克隆；已经有工作区就使用现有目录。
 
 ```bash
-gh repo fork hugosantanna/clo-author --clone
-cd clo-author
+git clone https://github.com/hbli3309-web/hb-workflow.git
+cd hb-workflow
+python3 scripts/new_project.py "../AI and work" --lang stata
 ```
 
-### Step 2: Start Claude Code
+生成器从当前工作区读取模板，拒绝覆盖已有目录，不带入研究数据、私人设置、旧会话状态或另一版。默认不初始化 Git；`--git` 只建立本地仓库，不 commit、push 或创建远端。其他语言使用 `--lang python`、`--lang r` 或 `--lang julia`。
+
+进入新项目再启动客户端：
 
 ```bash
+cd "../AI and work"
 claude
 ```
 
-Using VS Code? Open the Claude Code panel instead. Everything works the same.
+可以直接说：
 
-### Step 3: Paste the Starter Prompt
+> 我想研究 AI 如何改变企业的任务分工与招聘。先比较可能的经济机制、最近相关文献和能区分这些解释的证据，再建议值得先做的一步。遇到我不熟悉的理论时，请帮助我建立直觉。
 
-Fill in the **bolded placeholders** with your project details:
+不必先学完命令。常用入口见[日常研究](user-guide.qmd)和[命令参考](reference.qmd)。
 
-> I am starting a new empirical research project in **[YOUR FIELD]** on **[YOUR TOPIC]**.
-> Read CLAUDE.md and help me set up the project structure.
-> Start with `/discover --lit [YOUR TOPIC]`.
+## 项目里先看什么
 
-Claude reads the configuration, fills in your project details, and enters contractor mode --- planning, implementing, reviewing, and verifying autonomously.
+先维护一页 `research/PROJECT_BRIEF.md`：问题、机制、关键证据与缺口、下一步，以及待研究者判断的选择。有重要结果或决定后，再建立 `research/EVIDENCE_LEDGER.md` 和 `research/DECISIONS.md`。详细材料通过链接展开，避免靠多份会话日志重建背景。
 
-### Step 4: Start Working
+写作先处理经济逻辑和证据，再处理句子。中英学术论文与政策报告分体例，领域范文按任务实际阅读；用户修改优先于 AI 推测的风格。学习陌生理论、识别方法和经济思维也是工作的一部分。
 
-Once setup is done, just describe what you need:
+## 能力与边界
 
-- "Review my paper" --- checks your identification strategy, code, writing, and LaTeX in parallel
-- `/review --methods paper/main.tex` --- validates your causal design assumptions, clustering, and inference
-- `/analyze Data/cleaned/survey.csv` --- cleans data, runs your specification, produces tables and figures
-- `/new-project health insurance` --- walks you through the full pipeline from literature review to submission
+Claude 版提供 **12 个 skills、20 个 agents**，按需调用。检查使用 PASS、FAIL、NOT_RUN、NOT_APPLICABLE；输入改变使旧证据 STALE。静态检查不能代替运行，模拟审稿不能代替真实编辑决定。详见[架构与验证](architecture.qmd)。
 
-::: {.callout-tip title="Just Want to Try 2 Commands?"}
-Already have a paper? `/review paper/main.tex` checks your identification, code, writing, and LaTeX.
-Want to draft a section? `/write intro` produces a structured first draft adapted to your paper type.
-Everything else is optional --- explore when you're ready.
-:::
+升级先看差异并保留定制，不删除整个 `.claude/`，也不自动改 `~/.zshrc` 或全局客户端设置。见[项目定制](customization.qmd)。
 
-## What Happens Behind the Scenes
+## 来源
 
-You describe tasks in plain English. Claude dispatches specialized agents --- one creates, another reviews --- and presents results for your approval. Quality gates run in the background so broken work never ships. For the full picture: [Walkthrough](user-guide.qmd), [Agents](agents.qmd), [Architecture](architecture.qmd), [Commands](reference.qmd).
-
-::: {.callout-note collapse="true" title="Day 1 Checklist"}
-- [ ] Fork the repo and clone it locally
-- [ ] Run `claude` in the project directory
-- [ ] Paste the starter prompt (fill in your project details)
-- [ ] Wait for Claude to customize `CLAUDE.md` for your project
-- [ ] Approve the configuration plan
-- [ ] Ask Claude to do something: "Review my paper" or `/discover --lit [topic]`
-- [ ] Approve the task plan, watch it work, review the output
-
-That's it. Everything else --- agents, hooks, rules --- runs automatically in the background.
-:::
-
-::: {.callout-note collapse="true"}
-## Optional: Manual Setup
-
-If you prefer to configure things yourself instead of letting Claude handle it:
-
-**Customize CLAUDE.md** --- Open `CLAUDE.md` and replace all `[BRACKETED PLACEHOLDERS]`:
-
-1. **Project name and institution**
-2. **Folder structure** (adjust to your layout)
-3. **Current project state** (your papers and analyses)
-
-**Fill in the domain profile** --- Run `/discover` (interactive interview) or manually edit `.claude/references/domain-profile.md`:
-
-1. **Your field** and adjacent subfields
-2. **Target journals** ranked by tier
-3. **Common data sources** and identification strategies
-4. **Field conventions** and seminal references
-
-**Configure permissions** --- Review `.claude/settings.json`. The template includes permissions for git, LaTeX, R, and utility scripts.
-
-**Test it:**
-
-```bash
-/tools compile paper/main.tex
-/review --proofread paper/main.tex
-```
-:::
-
-## Prerequisites
-
-| Tool | Required For | Install |
-|------|-------------|---------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Everything | `npm install -g @anthropic-ai/claude-code` |
-| XeLaTeX | Paper compilation | [TeX Live](https://tug.org/texlive/) or [MacTeX](https://tug.org/mactex/) |
-| R | Analysis & figures | [r-project.org](https://www.r-project.org/) |
-| [gh CLI](https://cli.github.com/) | GitHub integration | `brew install gh` (macOS) |
-
-Optional: Python, Julia (multi-language analysis), [Quarto](https://quarto.org) (web slides).
-
-## Origin
-
-This project is a fork of [Pedro Sant'Anna's claude-code-my-workflow](https://github.com/pedrohcgs/claude-code-my-workflow), which was built for Econ 730 at Emory University (6 lectures, 800+ slides). The Clo-Author reorients that infrastructure from lecture production to empirical economics research.
-
-The `/humanizer` skill is by [Siqi Chen](https://github.com/blader/humanizer), adapted here for academic writing.
-
-Maintained by [Hugo Sant'Anna](https://hsantanna.org). MIT License --- fork it, customize it, make it yours.
+本库维护于 [hbli3309-web/hb-workflow](https://github.com/hbli3309-web/hb-workflow)，由 [clo-author](https://github.com/hugosantanna/clo-author) 和 [Pedro Sant’Anna 的工作流](https://github.com/pedrohcgs/claude-code-my-workflow) 改造。当前规则以本库入口和技能文件为准，旧版上游说明用于了解历史。

@@ -1,258 +1,49 @@
 ---
 name: strategize
-description: Design identification strategy, pre-analysis plan, or formal theory section. Dispatches Strategist / Theorist (proposer) and the paired critic (validator). Replaces /identify and /pre-analysis-plan.
-argument-hint: "[mode: strategy | pap | pap interactive | theory] [research question or spec path]"
-allowed-tools: Read,Grep,Glob,Write,Task
+description: Build economic mechanisms, identification strategies, pre-analysis plans, formal theory, or a coherent research spine. Supports empirical, structural, descriptive, and theory projects.
+argument-hint: "[strategy | mechanism | theory | spine | focus | pap | pap interactive] [question or source path]"
+allowed-tools: Read,Grep,Glob,Write,Edit,WebSearch,WebFetch,Agent
 ---
 
 # Strategize
 
-Design an identification strategy, pre-analysis plan, or formal theory section by dispatching the appropriate creator (**Strategist** or **Theorist**) and its paired critic.
+输入：`$ARGUMENTS`。先说清经济问题与机制，再选择能回答问题的对象、假设、数据和方法。默认中文，公式与英文术语按需使用。
 
-**Input:** `$ARGUMENTS` — mode keyword followed by research question or path to research spec.
+读取相关的 `research/PROJECT_BRIEF.md`、`research/EVIDENCE_LEDGER.md`、`research/DECISIONS.md` 及用户给定材料；不要求不存在的文件先齐备。按需读取 [研究协作](../../references/research-collaboration.md)、[方法参考](../../references/research-methods.md) 和领域资料。简短说明关键已知、未知和采用的假设，不写重复的“已读证明”。
 
----
+## 模式
 
-## Modes
+| 模式 | 执行与产物 |
+|---|---|
+| 默认 / `strategy` | `strategist` 制作 `research/strategy.md`；重要设计经 `strategist-critic` 审查 |
+| `mechanism` | `theorist` 用最小模型解释机制、竞争解释和可检验预测，写 `research/theory.md` |
+| `theory` | `theorist` 处理经济理论或计量理论，`theorist-critic` 审关键证明；按现有主稿格式交付 |
+| `spine` / `focus` | 综合结果和反证，更新 brief 中的当前主线；提出需要研究者判断的重大转向；两个名称为同一模式 |
+| `pap` | 基于已知设定制作 `research/pre-analysis-plan.md`，保留未定项与偏离记录 |
+| `pap interactive` | 兼容原用法，仅就缺失的关键设定对话澄清，再起草 PAP |
 
-### `/strategize [question]` or `/strategize strategy [question]` — Identification Strategy
-Design the causal identification strategy.
+没有可用子 agent 时串行处理并说明独立性限制。审查写 `quality_reports/reviews/YYYY-MM-DD_<task>.md`，按实际检查用 `PASS` / `FAIL` / `NOT_RUN` / `NOT_APPLICABLE`；输入改变旧结果为 `STALE`。
 
-**Agents:** Strategist → strategist-critic
-**Output:** Strategy memo + robustness plan + falsification tests
+## 策略内容
 
-Workflow:
-1. **Pre-Strategy Report (mandatory).** Before proposing any strategy, the Strategist must output a structured report proving it read the discovery inputs:
+围绕一个清楚问题比较有实质差别的路线，分别解释：目标对象、可用变化、关键识别假设、主要威胁、所需数据、实现与学习成本、最有价值的检验。推荐的理由可审阅，不让方法名或熟悉程度替研究者选择。
 
-```markdown
-## Pre-Strategy Report
-**Research spec:** [path or "not found"]
-**Literature review:** [path or "not found"]
-**Data assessment:** [path or "not found"]
-**Domain profile:** [loaded / not found]
+实证策略至少说明观测单位、主样本、处理和比较、时间结构、estimand、估计式/伪代码、推断方式及潜在失效情形。稳健性每项针对具体威胁；零结果和反常符号有解释位置。描述/测量研究不强加因果承诺；结构研究区分参数识别、估计、外部校准、预测与反事实，解释额外假设换来了什么。
 
-**Research question:** [one sentence from spec]
-**Key findings from literature:**
-- [What methods have been used for this question]
-- [What gaps remain]
-**Available data:**
-- [Dataset name] — [key variables, coverage, access]
-- [Variation available for identification]: [describe]
-**Candidate designs from domain profile:** [list relevant designs]
+重大主样本、主规格、estimand 或核心问题变化写入 `research/DECISIONS.md` 为 `proposed`，准备具体推荐供研究者判断；已有授权内的实现继续，不因新阶段重复确认。初稿缺条件时明确条件性建议，不能把假定政策、数据访问或变量可得性当事实。
 
-Proceeding to strategy design.
-```
+## 机制、理论与学习
 
-If research spec, literature review, or data assessment are missing, the Strategist proceeds with ASSUMED placeholders — but flags each clearly.
+实证论文也可用 toy model，纯理论论文无需先有数据或代码。说明参与者、目标、选择、约束、时序与均衡/决策概念；从能澄清问题的最小模型开始，必要复杂度才加入。
 
-2. Read .claude/references/domain-profile.md for common identification strategies in the field
-3. Dispatch Strategist to produce:
-   - Strategy memo: design choice, estimand, assumptions, comparison group
-   - Pseudo-code: implementation sketch
-   - Robustness plan: ordered list of checks with rationale
-   - Falsification tests: what SHOULD NOT show effects
-   - Referee objection anticipation: top 5 objections with responses
-4. Dispatch strategist-critic to review through 4 phases:
-   - Phase 1: Claim identification (design, estimand, treatment, control)
-   - Phase 2: Core design validity (assumption checks, sanity checks)
-   - Phase 3: Inference soundness (clustering, multiple testing)
-   - Phase 4: Polish and completeness (robustness, citations)
-5. If CRITICAL issues found, iterate (max 3 rounds per three-strikes)
-6. Save memo to `quality_reports/strategy_memo_[topic].md`
-7. Save review to `quality_reports/strategy_memo_[topic]_review.md`
-8. **Save decision record** → `quality_reports/decisions/strategy_[topic].md`
-   Using `templates/decision-record.md`, record:
-   - **Decision:** The chosen identification strategy (design + estimator)
-   - **Alternatives:** Other designs the Strategist considered (e.g., IV, RDD, SC, selection-on-observables)
-   - **Why rejected:** For each, the specific reason (no valid instrument, insufficient density at cutoff, no clean donor pool, etc.)
-   - **Key assumptions:** What must hold (parallel trends, exclusion restriction, continuity, etc.)
-   - **What would invalidate:** What findings would force a strategy change (pre-trends failure, weak first stage, manipulation at cutoff)
+推导应连接经济直觉、命题条件、比较静态和可观测含义。正式定理写清条件、证明和边界，数值检验不能替代证明。难点分层解释，主动提供可学习的新工具。模型解释与识别论证分别成立才可共同支持因果主张；一个拟合良好的模型不会自动验证机制。
 
-### `/strategize pap [spec]` — Pre-Analysis Plan
-Draft a pre-analysis plan following AEA/OSF/EGAP standards.
+`spine` 模式将每条主要结果归到支持、反驳或尚不能区分的机制，保留不方便的证据；优先建议最能改变判断的下一步。收敛是减少无信息分支，不能删反证来维护故事。
 
-**Input:** `$ARGUMENTS` — path to research spec file, a topic, or `interactive` for guided interview.
+## PAP 与登记
 
-- If `$ARGUMENTS` includes a file path: read it (research spec from `/discover interview`)
-- If `$ARGUMENTS` includes `interactive`: conduct the guided PAP interview (see below)
-- Otherwise: treat as topic and draft with ASSUMED placeholders marked clearly
+PAP 覆盖问题与设计、干预/分配或识别来源、主/次结果与测量、样本/排除/流失、估计与推断、异质性、多重检验、功效/MDE 的假设与敏感性、数据/软件、时间及偏离记录。根据真实研究类型取舍，不机械填全模板。
 
-**Agents:** Strategist (in PAP mode), optionally strategist-critic
-**Output:** Pre-analysis plan document
+区分 registry registration、平台认定的 preregistration、分析计划冻结时间以及研究者何时看过数据/结果。记录真实日期和已有知识；后验计划不能追溯写成预先承诺。AEA RCT Registry 允许登记，干预开始前登记才标为 pre-registered；字段和资格以当次官方规则为准。OSF/EGAP 等也先核验适用平台及当前规则，不宣称它们共享一套固定格式。依据见方法参考。
 
-#### Interactive PAP Interview (6-Question Guided Flow)
-
-When invoked as `/strategize pap interactive`, ask these questions one at a time before drafting:
-
-1. **What is the research question?**
-2. **What is the study design?** (RCT / natural experiment / quasi-experimental / observational)
-3. **What are the primary outcome variables?** (names, measurement, data source)
-4. **What is the identification strategy?** (randomization mechanism / treatment assignment / source of variation)
-5. **What subgroup analyses are pre-specified?** (with justification for each)
-6. **What multiple testing concerns exist?** (number of primary outcomes, family-wise error rate plan)
-
-After all 6 answers are collected, proceed to PAP drafting.
-
-#### PAP Sections
-
-Dispatch Strategist in PAP mode to produce all standard sections:
-
-1. **Study overview** — research question, design, treatment, control
-2. **Outcomes** — primary, secondary, mechanism variables with measurement details
-3. **Estimating equations** — with full notation protocol
-4. **Subgroup analyses** — pre-specified, with justification for each
-5. **Multiple testing correction** — Bonferroni / Benjamini-Hochberg / Romano-Wolf (specify which and why)
-6. **Power calculations** — MDE, baseline statistics, sample size, assumptions stated explicitly with sensitivity
-7. **Sample and exclusion rules** — inclusion criteria, attrition handling, outlier treatment
-8. **Data and analysis** — sources, software, randomization/assignment mechanism
-9. **Timeline** — data collection, analysis, registration dates
-10. **Deviations log** — empty template for tracking post-registration changes
-
-#### Platform-Specific PAP Templates
-
-Ask the user which registry platform they plan to use (if unclear from context):
-
-**AEA RCT Registry:**
-- Most structured format. All fields required.
-- Must be registered before intervention begins.
-- Strict section ordering: hypotheses → outcomes → analysis → power.
-- Requires IRB information and funding sources.
-
-**OSF (Open Science Framework):**
-- More flexible format. Good for observational studies and natural experiments.
-- Allows iterative updates with version history.
-- Less rigid section structure — can adapt to study design.
-- Supports pre-registration of observational/archival studies.
-
-**EGAP (Evidence in Governance and Politics):**
-- Development economics and political science focused.
-- Additional governance and ethics questions required.
-- Emphasizes pre-specification of heterogeneous treatment effects.
-- Requires description of implementing partners and field conditions.
-
-#### Observational Study PAP Adaptation
-
-For observational, quasi-experimental, or natural experiment designs, adapt the PAP template:
-
-- **Identification strategy replaces randomization** — describe the source of exogenous variation
-- **Comparison group replaces control group** — define who is compared to whom and why
-- **Identification assumption discussion** — explicitly state and defend each assumption
-- **Placebo and falsification tests** — pre-specify what SHOULD NOT show effects
-- **Robustness to specification choices** — pre-commit to bandwidth, functional form, sample restrictions
-- **Treatment of endogeneity concerns** — document known threats and planned diagnostics
-
-#### ASSUMED Placeholder Safety
-
-**CRITICAL: Flag every ASSUMED item clearly. The researcher must review and approve before registration.**
-
-When drafting a PAP from a topic (without a full research spec or interactive interview), many details will be assumed. For each assumed item:
-
-- Mark it with `[ASSUMED]` in bold
-- Explain what was assumed and why
-- Provide the most reasonable default but flag it for review
-
-A registered PAP with unchecked assumptions is worse than no PAP. The final section of every PAP must include:
-
-```markdown
-## Pre-Registration Checklist
-
-**Review every [ASSUMED] item before registering this plan.**
-
-- [ ] [ASSUMED] Item 1 — [what was assumed]
-- [ ] [ASSUMED] Item 2 — [what was assumed]
-
-**Do not register until all items are reviewed and confirmed or corrected.**
-```
-
-#### Optional strategist-critic Review
-
-After PAP creation, optionally dispatch the strategist-critic to review:
-- Are identification assumptions clearly stated and defensible?
-- Is the estimator choice appropriate for the design?
-- Are power calculation assumptions reasonable? Show sensitivity.
-- Are pre-specified subgroups justified (not fishing)?
-- Are multiple testing corrections appropriate?
-- Are any [ASSUMED] items potentially problematic if left uncorrected?
-
-Save review to `quality_reports/pre_analysis_plan_[topic]_review.md`
-
-Save PAP to `quality_reports/pre_analysis_plan_[topic].md`
-
----
-
-### `/strategize theory [target]` — Formal Theory Section
-
-Produce a formal theory section: assumptions, definitions, lemmas, theorems, and proofs.
-
-**When to use:**
-- Paper type is **econometric methods** (the method is the contribution)
-- Paper type is **theory + empirics** (theoretical predictions are tested)
-- Paper type is **structural** (identification of structural parameters needs formal argument)
-- Paper type is **methodological reduced-form** (the design contributes a new estimator)
-
-**Skip this mode** for applied papers that use off-the-shelf estimators — the strategist's memo is sufficient.
-
-**Input:** `$ARGUMENTS` — research question, path to strategy memo, or path to existing paper/draft.
-
-**Agents:** Theorist → theorist-critic
-**Output:** Theory memo + assumptions.tex + results.tex + proofs.tex + notation glossary
-
-Workflow:
-1. **Pre-Theory Report (mandatory).** Before writing any math, the Theorist must output a structured report showing what was read:
-
-```markdown
-## Pre-Theory Report
-**Research spec:** [path or "not found"]
-**Strategy memo:** [path or "not found"]
-**Existing paper/draft:** [path or "not found"]
-**Domain profile:** [loaded / not found]
-**Notation conventions:** [header.tex path / domain-profile notation table / "not found"]
-**Bibliography base:** [path / "not found"]
-
-**Paper type:** [econometric methods / theory+empirics / structural / methodological reduced-form]
-**Theoretical object(s) to produce:** [identification / consistency / asymp. normality / influence function / DML / bootstrap / test / proposition]
-**Data structure:** [iid / panel / staggered / clustered / triangular array]
-**Target parameter:** [definition as functional of P]
-**Estimator:** [definition]
-**Assumptions anticipated:** [A1 sampling, A2 parallel trends, ...]
-
-Proceeding to theory drafting.
-```
-
-If strategy memo or paper type is missing, the Theorist flags it and asks before proceeding.
-
-2. Read `.claude/references/domain-profile.md` for the Theoretical Foundational References table and Author Team table.
-3. Dispatch **Theorist** to produce:
-   - `quality_reports/theory/[topic]/theory_memo.md`
-   - `quality_reports/theory/[topic]/assumptions.tex`
-   - `quality_reports/theory/[topic]/results.tex`
-   - `quality_reports/theory/[topic]/proofs.tex`
-   - `quality_reports/theory/[topic]/notation_glossary.md`
-4. Dispatch **theorist-critic** to review through 4 sequential phases:
-   - Phase 1: Claim identification (object type, target parameter, estimator, assumptions)
-   - Phase 2: Proof validity (logical, measurability, expansions, identification, asymptotic distribution) — **early-stop on critical gaps**
-   - Phase 3: Assumption minimality + statement calibration + notation consistency (INV-7)
-   - Phase 4: Citation fidelity + linkage to empirical claims + exposition
-5. If CRITICAL issues found, iterate (max 3 rounds per three-strikes). Escalation target: User.
-6. Save review to `quality_reports/theory_[topic]_review.md`
-7. **Save decision record** → `quality_reports/decisions/theory_[topic].md`
-   Record:
-   - **Decision:** The theoretical objects proved (identification, asymptotic distribution, etc.)
-   - **Assumptions:** Full list with interpretation
-   - **What's open:** What the theory does NOT cover (caveats for the writer)
-   - **Linkage:** Which empirical claims each theorem supports
-
----
-
-## Principles
-
-- **Strategist proposes, strategist-critic critiques.** Adversarial pairing catches design flaws early.
-- **Theorist proves, theorist-critic checks the proof.** Proof validity gates everything downstream — notation, citations, polish.
-- **Strategy memo is the contract.** Once approved, the Coder implements it faithfully.
-- **Catch problems before coding.** A flawed strategy caught now saves weeks of wasted analysis.
-- **Multiple strategies are OK.** Present trade-offs and let the user choose.
-- **The user decides.** If Strategist and strategist-critic disagree after 3 rounds, the user resolves it.
-- **Pre-specification is the point.** Everything in a PAP is decided before seeing outcomes.
-- **Be honest about what's exploratory.** Label subgroups and secondary outcomes clearly.
-- **Power calculations require assumptions.** State every assumption. Show sensitivity.
-- **A PAP is a commitment device.** Make sure the researcher understands what they're committing to.
+未决定项写 `[UNCONFIRMED]`；只有为展示推导而临时采用的值写 `[ASSUMED: 理由]`。功效参数无证据就展示情景，不编造基准统计量。正式登记前逐项解决实质未定内容、保留可审阅版本并确认外部提交授权；起草和核验无需额外许可。

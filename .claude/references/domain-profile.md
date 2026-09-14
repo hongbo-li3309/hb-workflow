@@ -1,127 +1,47 @@
 # Domain Profile
 
-<!--
-HOW TO USE: Fill this in manually OR let /discover (interactive interview) generate it.
-All agents read this file to calibrate their field-specific behavior.
-Delete sections that don't apply. Add sections specific to your field.
-If no field is specified, agents default to applied economics.
--->
+这是可直接编辑的领域入口，帮助按项目校准检索、机制、写作和审查。领域兴趣不等于当前项目事实；具体设定以 `research/PROJECT_BRIEF.md` 和 Hongbo 最新明确说明为准。
 
-## Field
+## 已确认的研究者背景与偏好
 
-**Primary:** [e.g., Health Economics, Labor Economics, Development, IO, Public Finance]
-**Adjacent subfields:** [e.g., Labor, Public, IO — fields whose methods and journals overlap]
+- Hongbo Li：北京大学国家发展研究院经济学博士候选人；用户说明 2026–27 年在 Stanford SCCEI 访问，身份为 Visiting Student Researcher，与 eSET 项目相关。此信息不推出任何未确认合作人、数据权限或项目结论。
+- 研究兴趣：劳动经济学、技术变迁、AI 对劳动需求/生产率/雇佣安排的影响，以及平台劳动和灵活用工。
+- 默认中文交流，保留必要英文术语；Stata 优先，已有项目或方法的实际需求决定语言选择。
+- 研究问题和机制先于方法；博士阶段学习优先，欢迎有根据地引入陌生理论、识别与测量工具。
+- 写作追求清楚、简明、自然，依据语言、体例、领域和读者调整；作者明确修订优先于 AI 推测的偏好。
 
----
+## 当前项目字段（按需填写）
 
-## Target Journals (ranked by tier)
+| 字段 | 记录内容 |
+|---|---|
+| 核心领域与相邻领域 | `[项目未指定]`；不要从个人兴趣直接补为项目设定 |
+| 研究类型 | `[实证/理论/结构/方法/测量/混合，按实际选择]` |
+| 读者、语言、体例 | `[当前稿件要求]` |
+| 目标期刊/报告对象 | `[用户选择；期刊格式需查当前官方要求]` |
+| 数据来源、可用范围和访问 | `[已核验的来源与实际权限]` |
+| 主要对象与设计 | `[estimand/机制/测量对象、关键假设]` |
+| 符号约定 | `[符号—定义—单位；沿用主稿]` |
+| 合作者与分工 | `[仅用户已确认信息]` |
+| 数值容差 | `[按具体算法、模拟误差和研究精度解释，不用通用固定值]` |
 
-<!-- The Orchestrator uses this for journal selection. The Librarian prioritizes these in searches. -->
+## 劳动与技术研究可调用的思路
 
-| Tier | Journals |
-|------|----------|
-| Top-5 | AER, Econometrica, JPE, QJE, REStud |
-| Top field | [e.g., JHE, RAND JE, AEJ:EP, AEJ:Applied] |
-| Strong field | [e.g., Health Affairs, AJHE, JPubE, JHR] |
-| Specialty | [e.g., Medical Care, Health Services Research] |
+以下是探索菜单，不是当前论文的假设或结论。按问题选择，必要时跨到 IO、组织经济学、公共经济学、发展、宏观或创新经济学。
 
----
+| 问题 | 可以比较的机制 | 有价值的判别证据 |
+|---|---|---|
+| 技术与劳动需求 | 任务替代、互补、新任务、需求扩张、市场份额再分配 | 任务与产出变化、价格/销量、工时与人员、企业内/间调整 |
+| 生产率提升与组织 | 学习、监督、知识传递、管理流程、协调成本 | 工作过程、质量与速度、培训/经验、团队/层级差异 |
+| 招聘与雇佣安排 | 需求、离职与补员、招聘渠道、外包/承包、劳动供给 | vacancy/hire/employment 的不同口径、人员流动、合同与实际工时 |
+| 平台与灵活用工 | 搜寻匹配、定价、控制权、风险分担、信息与市场势力 | 多平台参与、接单/定价规则、收入风险、替代机会与退出 |
+| 技术采用与扩散 | 采用成本、互补资产、能力、预期需求和选择 | 实际使用 vs 暴露、采用时点、组织/技能投入、未采用者 |
 
-## Common Data Sources
+变量名字不等于构念。AI exposure 不直接等于采用或外生处理；招聘广告不直接等于实际新增就业；速度提升不自动意味着质量或总生产率提升。用数据文档、制度和原始研究核验具体含义。
 
-<!-- The Explorer prioritizes these. The explorer-critic knows their quirks. -->
+## 文献与写作校准
 
-| Dataset | Type | Access | Notes |
-|---------|------|--------|-------|
-| [e.g., CPS] | [survey/admin/panel] | [public/restricted] | [key strengths and limitations] |
+重要文献进入 `research/literature.md`，记录版本、日期、原始链接、读取范围和与当前问题关系。当前前沿必须按任务日期检索；不把固定作者名单或旧 bibliography 称为最新。理论基础与计量方法按问题选择，不因作者声望决定正确性。
 
----
+写作根据已读过的真实范文提炼问题组织、机制阐释、证据连接和限定语，保留 Hongbo 的声音。参考 [个人风格](personal-style-guide.md) 与 [期刊资料](journal-profiles.md)，区分用户确认的偏好、暂定观察和官方格式。示范名单不是必引文献，也不构成期刊“口味”的证据。
 
-## Common Identification Strategies
-
-<!-- The Strategist considers these first. The strategist-critic knows field-specific threats. -->
-
-| Strategy | Typical Application | Key Assumption to Defend |
-|----------|-------------------|------------------------|
-| [e.g., State-level DiD] | [Policy variation across states] | [Parallel trends in outcomes across treated/control states] |
-
----
-
-## Field Conventions
-
-<!-- The Coder and Writer follow these. The writer-critic checks for them. -->
-
-- [e.g., Binary outcomes → report LPM alongside logit/probit marginal effects]
-- [e.g., Cost outcomes → log transform or GLM (Gamma, log link)]
-- [e.g., Clustering at state level for state-level policy variation]
-- [e.g., Always discuss moral hazard / adverse selection implications]
-- [e.g., Welfare analysis expected in top-5 submissions]
-
----
-
-## Notation Conventions
-
-<!-- The Writer and writer-critic enforce these. -->
-
-| Symbol | Meaning | Anti-pattern |
-|--------|---------|-------------|
-| [e.g., $Y_{it}$] | [Outcome for individual i at time t] | [Don't use $y$ without subscripts] |
-
----
-
-## Seminal References
-
-<!-- The Librarian ensures these are cited when relevant. The strategist-critic knows their methods. -->
-
-| Paper | Why It Matters |
-|-------|---------------|
-| [e.g., Finkelstein et al. (2012)] | [Oregon HIE — gold standard for insurance effects] |
-
----
-
-## Theoretical Foundational References
-
-<!-- The Theorist and theorist-critic default to these anchors when building or reviewing a theory section.
-     Only needed if the paper has a formal theory section (econometric methods, theory+empirics,
-     structural identification, or methodological reduced-form).
-     Leave empty to fall back to the generic econometric theory defaults baked into the theorist agent. -->
-
-| Topic | Anchor references |
-|-------|------------------|
-| [e.g., DiD with staggered adoption] | [e.g., Callaway & Sant'Anna (2021); Sant'Anna & Zhao (2020)] |
-| [e.g., Semiparametric efficiency] | [e.g., Newey (1990, 1994); Bickel-Klaassen-Ritov-Wellner (1993)] |
-
----
-
-## Paper Author Team
-
-<!-- Used by the theorist-critic to calibrate respect. If the authors are themselves among the reference
-     literature on a topic, the critic avoids lecturing them on their own contributions.
-     List author surnames + the topics they are foundational on. -->
-
-| Author | Foundational on |
-|--------|----------------|
-| [e.g., Callaway] | [DiD with staggered adoption, $ATT(g,t)$] |
-
----
-
-## Field-Specific Referee Concerns
-
-<!-- The domain-referee and methods-referee watch for these. -->
-
-- [e.g., "Why not use the Oregon HIE?" — must address if studying insurance effects]
-- [e.g., "Selection into treatment" — always a concern in health care utilization studies]
-- [e.g., "Moral hazard vs adverse selection" — referees expect you to distinguish]
-- [e.g., "External validity" — Medicaid population ≠ general population]
-
----
-
-## Quality Tolerance Thresholds
-
-<!-- Customize for your domain's standards. Used by quality.md. -->
-
-| Quantity | Tolerance | Rationale |
-|----------|-----------|-----------|
-| Point estimates | [e.g., 1e-6] | [Numerical precision] |
-| Standard errors | [e.g., 1e-4] | [MC variability] |
-| Coverage rates | [e.g., ± 0.01] | [Simulation with B reps] |
+方法核验与正式推导见 [research-methods.md](research-methods.md)，协作、证据与教学见 [research-collaboration.md](research-collaboration.md)。
