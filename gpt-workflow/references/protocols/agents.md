@@ -21,6 +21,6 @@
 
 委派说明经济问题、授权范围、输入及版本、允许写入的文件、预期结果和验收证据。独立只读任务可并行，共用文件或依赖结果顺序整合。PROJECT_BRIEF、EVIDENCE_LEDGER、DECISIONS 默认由主会话整合，避免相互覆盖。
 
-所有 critic、referee 和 editor 只返回报告，不修改文件；由主会话存 `quality_reports/reviews/`。其只读配置不会自动移除所有 MCP 能力，因此仍不得调用产生外部修改的工具。实际执行检查交给具备授权执行能力的 verifier／worker，结果入 `quality_reports/runs/`。不以角色自报完成代替产物核验。
+所有 critic、referee 和 editor 只返回发现，不修改文件；主会话先在对话中整合，只有正式评审、重要核验或交接需要时才存 `quality_reports/reviews/`。普通任务由主会话兼任执行者与质疑者，不为角色区分强行启动两个 agent。其只读配置不会自动移除所有 MCP 能力，因此仍不得调用产生外部修改的工具。实际执行检查交给具备授权执行能力的 verifier／worker，结果入 `quality_reports/runs/`。不以角色自报完成代替产物核验。
 
 主会话处理审稿分歧：区分实质错误、证据缺口和偏好，核对关键证据，给能改变判断的下一步。不要为了一个段落改写启动全套角色，也不要让作者从二十份报告中拼出项目背景。

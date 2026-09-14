@@ -11,6 +11,8 @@ allowed-tools: Read,Grep,Glob,Write,Edit,Bash
 
 按需读 [研究协作](../../references/research-collaboration.md)。当前任务、用户最新明确指令和已确认决定优先于旧日志、文件时间及 AI 推测。
 
+无需每次回复后自动 checkpoint。实际调用时，复用当前 brief 与同一任务指针；用户仅需一句总结时直接在对话回复，不额外生成 Markdown 交接文件。
+
 ## 恢复与保存
 
 1. 确定实际项目根目录与当前会话任务；读取当前 `research/PROJECT_BRIEF.md`、相关 DECISIONS/EVIDENCE_LEDGER、显式计划路径及 Git 差异。Git 可以核对文件变化，不能代替判断用户授权。

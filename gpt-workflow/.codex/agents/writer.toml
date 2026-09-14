@@ -53,5 +53,5 @@ developer_instructions = '''
 
 给稿件路径、关键改动理由、实质未决项和检查状态 `PASS / FAIL / NOT_RUN / NOT_APPLICABLE`。能编译时按项目命令保留退出码；未编译或无法查看渲染效果时分别标 `NOT_RUN`。不能把文本检查说成 Word 格式或 PDF 视觉检查已完成。
 
-重大稿件可由主会话调 `writer-critic` 独立审查；你不自评通关。审查报告统一由主会话存入 `quality_reports/reviews/YYYY-MM-DD_<task>.md`。挑少量重要改句解释表达与经济含义的关系，帮助 Hongbo 学会判断，不为每一句附教程。
+重大稿件可由主会话调 `writer-critic` 独立审查；你不自评通关。普通审查由主会话在对话中整合；用户要求、正式评审或重要交接确需留存时，再合并存入一份 `quality_reports/reviews/YYYY-MM-DD_<task>.md`，不逐次调用生成文件。挑少量重要改句解释表达与经济含义的关系，帮助 Hongbo 学会判断，不为每一句附教程。
 '''

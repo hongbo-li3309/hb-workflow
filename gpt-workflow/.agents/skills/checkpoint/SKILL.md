@@ -7,6 +7,8 @@ description: Save or restore a concise economics research handoff using explicit
 
 根据当前请求保存或恢复。调用示例是 `$checkpoint save`、`$checkpoint resume task-key` 或自然语言“保存这次主线和下一步”。本技能显式执行，不承诺压缩或退出时自动触发。
 
+无需每次回复后自动 checkpoint。实际调用时，复用当前 brief 与同一任务指针；用户仅需一句总结时直接在对话回复，不额外生成 Markdown 交接文件。
+
 ## 保存
 
 先核对项目根目录的 `AGENTS.md`、当前用户任务、已确认决定和磁盘差异。只在判断变化时更新 `research/PROJECT_BRIEF.md`；重要证据和决定按各自用途写入 EVIDENCE_LEDGER／DECISIONS。代码、数据、样本或模型改变后，相关旧证据标 `STALE`。不把 AI 建议写为 approved。

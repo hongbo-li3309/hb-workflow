@@ -1,9 +1,9 @@
 # 状态与日志
 
-当前状态是 `research/PROJECT_BRIEF.md`；重要证据是 `research/EVIDENCE_LEDGER.md`；重大决定是 `research/DECISIONS.md`。模板在 `templates/`。不为每个 agent 调用重复生成日志，也不把 AI 推荐记录为已确认决定。
+常规交付直接在对话中说明变化、关键疑点和下一步，不自动新建计划、总结、审查或会话日志。已有材料能表达清楚就局部更新；文件数量不代表进度。具体产物规则见研究协作参考。
 
-有必要交接时，在 `SESSION_REPORT.md` 追加一条简短记录：任务、发生变化的认识/文件、验证证据、下一步、待确认事项。重大变更可用 `quality_reports/session_logs/YYYY-MM-DD_<task>.md`。已有 `quality_reports/research_journal.md` 保留为历史；不强制继续重复写同一内容。
+当前状态在已有 `research/PROJECT_BRIEF.md`；有重要证据或重大决定时再用 `research/EVIDENCE_LEDGER.md`、`research/DECISIONS.md`。同一条信息只保留一处完整记录，其他位置需要时链接；不把 AI 推荐记录为已确认决定。
 
-每次 `/checkpoint` 先检查是否已有相同记录；无变化不追加。知识偏好只记录用户明确确认或有证据的经验，注明日期与适用范围。MEMORY 不保存猜测的研究事实，不声称自动记忆一定写入成功。
+每次 `/checkpoint` 先检查是否已有相同记录；无变化不追加。优先更新当前 brief 和同一任务指针。只有旧项目明确使用 `SESSION_REPORT.md` 或 session logs 且本次有额外交接价值时才补充，不另建平行记录。MEMORY 只记录有依据的稳定偏好，不保存猜测的研究事实。
 
-原始执行日志保存在 `quality_reports/runs/`，应与本次命令、输入/脚本指纹和输出对应；体积大、敏感内容不要进 Git。审查产物在 `quality_reports/reviews/`。主稿修订日志记录基准版本、输出和重要含义变化。
+实际执行所需的脚本和原始日志仍保留在 `quality_reports/runs/`，对应命令、输入/脚本指纹和输出；体积大、敏感内容不要进 Git。普通审查在对话返回；正式审查或重要核验有留存价值时才存 `quality_reports/reviews/`。减少中间文件不等于省略必要核验或擅自删除原稿、数据和历史证据。
